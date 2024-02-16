@@ -210,7 +210,7 @@ CREATE TABLE public.proposal (
     start_date date,
     end_date date,
     period_days character varying(4),
-    delivery_address character varying(4),
+    delivery_address character varying(100),
     validity character varying(10),
     value character varying(100)
 );

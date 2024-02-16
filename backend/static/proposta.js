@@ -273,8 +273,17 @@ function updatePricesForAllServices() {
     updateTotalValue();
 }
 
+document.addEventListener('DOMContentLoaded', function() {
+    var form = document.getElementById('proposal-form');
+
+    form.addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        submitProposalForm();
+    });
+});
+
 function submitProposalForm() {
-    event.preventDefault();
     const formData = new FormData(document.getElementById('proposal-form'));
 
     fetch('/proposta', {
