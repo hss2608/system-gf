@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proposta Comercial</title>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="{{ url_for('static', filename='proposta.js') }}"></script>
+    <style>
+        table, th, td {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+    <h1>Proposta Comercial</h1>
+
+    <form method="POST" action="{{ url_for('proposta') }}" id="proposal-form" onsubmit="submitProposalForm()">
+        <input type="hidden" name="client_id" id="client_id" value="{% if client_data and 'id' in client_data %}{{ client_data['id'] }}{% endif %}">
+
+        <label for="cpf_cnpj" title="CPF/CNPJ">CPF/CNPJ:</label>
+        <input type="text" name="cpf_cnpj" id="cpf_cnpj" required onblur="populateClientData()" autocomplete="tax-id" placeholder="CPF/CNPJ">
+        <input type="hidden" id="client_data" data-client="{{ client_data | tojson }}"><br>
+
+        <label for="company" title="EMPRESA">EMPRESA:</label>
+        <input type="text" name="company" id="company" autocomplete="organization" readonly><br>
+
+        <label for="contact_name" title="CONTATO">CONTATO:</label>
+        <input type="text" name="contact_name" id="contact_name" autocomplete="name" readonly><br>
+
+        <label for="phone" title="TELEFONE">TELEFONE:</label>
+        <input type="text" name="phone" id="phone" autocomplete="tel" readonly><br>
+
+        <label for="email" title="EMAIL">EMAIL:</label>
+        <input type="text" name="email" id="email" autocomplete="email" readonly><br>
+
+        <label for="number_store" title="LOJA">LOJA:</label>
+        <input type="text" name="number_store" id="number_store" autocomplete="off" readonly><br>
+
+        <label for="status">STATUS:</label>
+        <select name="status" id="status">
+            <option value="Enviada">Enviada</option>
+            <option value="Aprovada">Aprovada</option>
+            <option value="Reprovada">Reprovada</option>
+        </select><br>
+
+        <label for="delivery_address" title="END DE ENTREGA">ENDERECO DE ENTREGA</label>
+        <input type="text" name="delivery_address" id="delivery_address"><br>
+
+        <label for="delivery_date">DATA DE ENTREGA:</label>
+        <input type="text" name="delivery_date" id="delivery_date" pattern="\d{2}/\d{2}/\d{4}" placeholder="__/__/____"><br>
+
+        <label for="withdrawal_date">DATA DE RETIRADA:</label>
+        <input type="text" name="withdrawal_date" id="withdrawal_date" pattern="\d{2}/\d{2}/\d{4}" placeholder="__/__/____"><br>
+
+        <label for="start_date">DATA DE INICIO:</label>
+        <input type="text" name="start_date" id="start_date" pattern="\d{2}/\d{2}/\d{4}" onblur="updatePeriodDays()" placeholder="__/__/____"><br>
+
+        <label for="end_date">DATA FINAL:</label>
+        <input type="text" name="end_date" id="end_date" pattern="\d{2}/\d{2}/\d{4}" onblur="updatePeriodDays()" placeholder="__/__/____"><br>
+
+        <label for="period_days">PERIODO:</label>
+        <input type="text" name="period_days" id="period_days" readonly><br>
+
+        <label for="validity" title="VALIDADE">VALIDADE DA PROPOSTA:</label>
+        <input type="text" name="validity" id="validity"><br>
+
+        <input type="hidden" name="product_id[]" class="product_id" value="{% if product_data and 'id' in product_data %}{{ product_data['id'] }}{% endif %}">
+
+        <label for="product_code" title="product_code">CODIGO:</label>
+        <input type="text" name="product_code" id="product_code" placeholder="EQUIPAMENTOS">
+        <input type="hidden" id="product_data" data-product="{{ product_data | tojson }}">
+        <button type="button" onclick="populateProductData()">ADICIONAR</button>
+
+        <input type="hidden" id="price" name="price" autocomplete="off">
+        <input type="hidden" id="unit_price" name="unit_price">
+
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>CODIGO</th>
+                    <th>DESCRICAO</th>
+                    <th>TIPO</th>
+                    <th>DESCRICAO COMPLEMENTAR</th>
+                    <th>R$ UNIT</th>
+                    <th>R$</th>
+                </tr>
+            </thead>
+            <tbody id="product_table_body">
+                <tr>
+                    <td class="product_code_placeholder">{{ product_data.product_code or '' }}</td>
+                    <td class="description_placeholder">{{ product_data.description or '' }}</td>
+                    <td class="type_placeholder">{{ product_data.type or '' }}</td>
+                    <td class="add_description_placeholder">{{ product_data.add_description or '' }}</td>
+                    <td class="unit_price_placeholder"></td>
+                    <td class="price_placeholder"></td>
+                </tr>
+            </tbody>
+        </table><br>
+
+        <label for="cod" title="cod">CODIGO:</label>
+        <input type="text" name="cod[]" id="cod" class="cod" value="{% if service_data and 'cod' in service_data %}{{ service_data['cod'] }}{% endif %}" placeholder="RESSARCIMENTO">
+        <input type="hidden" id="service_data" data-product="{{ service_data | tojson }}">
+        <button type="button" onclick="populateServiceData()">ADICIONAR</button>
+
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>CODIGO</th>
+                    <th>DESCRICAO</th>
+                    <th>DIAS</th>
+                    <th>R$ UNIT</th>
+                    <th>R$</th>
+                </tr>
+            </thead>
+            <tbody id="service_table_body">
+                <tr>
+                    <td class="cod_placeholder">{{ service_data.cod or '' }}</td>
+                    <td class="descript_placeholder">{{ service_data.descript or '' }}</td>
+                    <td class="service_days_placeholder"></td>
+                    <td class="service_unit_price_placeholder"></td>
+                    <td class="service_price_placeholder"></td>
+                </tr>
+            </tbody>
+        </table><br>
+
+        <label for="value" title="value">R$</label>
+        <input type="text" id="value" name="value" readonly><br>
+
+        <button type="submit">CONFIRMAR</button>
+
+    </form>
+</body>
+</html>

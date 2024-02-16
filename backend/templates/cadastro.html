@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro CLientes</title>
+</head>
+<body>
+    <h2>Cadastro</h2>
+    <form method="POST" action="{{ url_for('cadastro_route') }}">
+        <label for="company">NOME DA EMPRESA:</label>
+        <input type="text" name="company" required><br>
+
+        <label for="corporate_name">RAZAO SOCIAL:</label>
+        <input type="text" name="corporate_name"><br>
+
+        <label for="number_store">LOJA:</label>
+        <input type="number" name="number_store"><br>
+
+        <label for="person_type">PESSOA:</label>
+        <select name="person_type" id="person_type">
+            <option value="Juridica">Juridica</option>
+            <option value="Fisica">Fisica</option>
+        </select><br>
+
+        <label for="company_address">ENDERECO DA EMPRESA:</label>
+        <input type="text" name="company_address"><br>
+
+        <label for="client_type">TIPO DE CLIENTE:</label>
+        <select name="client_type" id="client_type">
+            <option value="Cons. Final">Cons. Final</option>
+            <option value="Produtor Rural">Produtor Rural</option>
+            <option value="Revendedor">Revendedor</option>
+            <option value="Solidario">Solidario</option>
+            <option value="Exportacao">Exportacao</option>
+        </select><br>
+
+        <label for="cpf_cnpj">CPF/CNPJ</label>
+        <input type="text" name="cpf_cnpj"><br>
+
+        <label for="state_registration">INSCRICAO ESTADUAL:</label>
+        <input type="text" name="state_registration"><br>
+
+        <label for="registration_date">DATA DE REGISTRO:</label>
+        <input type="text" name="registration_date" value="{{ current_date }}" readonly><br>
+
+        <label for="contact_name">CONTATO:</label>
+        <input type="text" name="contact_name"><br>
+
+        <label for="phone">TELEFONE:</label>
+        <input type="text" name="phone" required><br>
+
+        <label for="email">EMAIL:</label>
+        <input type="email" name="email" required><br>
+
+        <label for="billing_address">ENDERECO DE COBRANCA:</label>
+        <input type="text" name="billing_address"><br>
+
+        <input type="submit" value="CONFIRMAR">
+
+    </form>
+</body>
+</html>
+
