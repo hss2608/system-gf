@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="content-type" content="application/json">
     <title>Proposta Comercial</title>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <style>
@@ -64,15 +65,17 @@
         <label for="validity" title="VALIDADE">VALIDADE DA PROPOSTA:</label>
         <input type="text" name="validity" id="validity"><br>
 
-        <input type="hidden" name="product_id[]" class="product_id" value="{% if product_data and 'id' in product_data %}{{ product_data['id'] }}{% endif %}">
+        <input type="hidden" name="product_id[]" id="product_id" class="product_id" value="{% if product_data and 'id' in product_data %}{{ product_data['id'] }}{% endif %}">
 
         <label for="product_code" title="product_code">CODIGO:</label>
         <input type="text" name="product_code" id="product_code" placeholder="EQUIPAMENTOS">
         <input type="hidden" id="product_data" data-product="{{ product_data | tojson }}">
+        <input type="hidden" id="description" name="description">
+        <input type="hidden" id="type" name="type">
+        <input type="hidden" id="add_description" name="add_description">
+        <input type="hidden" id="unit_price" name="type">
+        <input type="hidden" id="price" name="price">
         <button type="button" onclick="populateProductData()">ADICIONAR</button>
-
-        <input type="hidden" id="price" name="price" autocomplete="off">
-        <input type="hidden" id="unit_price" name="unit_price">
 
         <table border="1">
             <thead>
@@ -97,9 +100,12 @@
             </tbody>
         </table><br>
 
+        <input type="hidden" name="refund_id[]" id="refund_id" class="refund_id" value="{% if service_data and 'cod' in service_data %}{{ service_data['cod'] }}{% endif %}">
+
         <label for="cod" title="cod">CODIGO:</label>
-        <input type="text" name="cod[]" id="cod" class="cod" value="{% if service_data and 'cod' in service_data %}{{ service_data['cod'] }}{% endif %}" placeholder="RESSARCIMENTO">
-        <input type="hidden" id="service_data" data-product="{{ service_data | tojson }}">
+        <input type="text" name="cod" id="cod" placeholder="RESSARCIMENTO">
+        <input type="hidden" id="service_data" data-service="{{ service_data | tojson }}">
+        <input type="hidden" name="descript" id="descript">
         <button type="button" onclick="populateServiceData()">ADICIONAR</button>
 
         <table border="1">

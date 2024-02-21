@@ -75,7 +75,7 @@ def buscar_servicos(cod,):
 def proposta_comercial(form_data):
     try:
         required_fields = ['client_id', 'status', 'delivery_address', 'delivery_date', 'withdrawal_date',
-                           'start_date', 'end_date', 'period_days', 'validity', 'product_id', 'cod', 'value']
+                           'start_date', 'end_date', 'period_days', 'validity', 'product_id[]', 'refund_id[]', 'value']
 
         missing_fields = [field for field in required_fields if field not in form_data or not form_data[field]]
         if missing_fields:
@@ -97,6 +97,7 @@ def proposta_comercial(form_data):
         ))
 
         proposal_id = cursor.fetchone()[0]
+        print(proposal_id)
 
         for product_id in form_data.getlist('product_id[]'):
             cursor.execute("""
@@ -104,7 +105,7 @@ def proposta_comercial(form_data):
                 VALUES (%s, %s);
             """, (proposal_id, int(product_id)))
 
-        for refund_id in form_data.getlist('cod[]'):
+        for refund_id in form_data.getlist('refund_id[]'):
             cursor.execute("""
                 INSERT INTO proposal_refund (proposal_id, refund_id)
                 VALUES (%s, %s);

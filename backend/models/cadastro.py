@@ -30,7 +30,7 @@ def Cadastro():
 
             cursor.execute("""
                 INSERT INTO clients (company, corporate_name, number_store, person_type, company_address, client_type, cpf_cnpj, state_registration, registration_date, contact_name, phone, email, billing_address)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, CURRENT_TIMESTAMP, %s, %s, %s, %s)  
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, CURRENT_TIMESTAMP, %s, %s, %s, %s)  
             """, (
                 company, corporate_name, number_store, person_type, company_address, client_type, cpf_cnpj, state_registration, contact_name, phone, email, billing_address
             ))

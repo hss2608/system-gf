@@ -30,7 +30,7 @@ function populateClientData() { //funcao para apresentar os clientes no formular
 
 function updateTable(productData) {
     var tableBody = $('#product_table_body');
-    var existingRow = tableBody.find('tr[data-product-code="' + productData.product_code + '"]');
+    var existingRow = tableBody.find('tr[data-product="' + productData.product_code + '"]');
         // atualizando uma nova linha
     if (existingRow.length > 0) {
         existingRow.find('.description_placeholder').text(productData.description || '');
@@ -40,7 +40,7 @@ function updateTable(productData) {
         existingRow.find('.price_placeholder').text(calculatePrice(existingRow).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }));
         // adicionando uma nova linha
     } else {
-        var newRow = $('<tr data-product-code="' + productData.product_code + '">');
+        var newRow = $('<tr data-product="' + productData.product_code + '">');
         newRow.append('<td class="product_code_placeholder">' + productData.product_code + '</td>');
         newRow.append('<td class="description_placeholder">' + productData.description + '</td>');
         newRow.append('<td class="type_placeholder">' + productData.type + '</td>');
@@ -217,7 +217,7 @@ function populateServiceData() {
 
 function updateTableService(serviceData) {
     var tableBody = $('#service_table_body');
-    var existingRow = tableBody.find('tr[data-product-code="' + serviceData.cod + '"]');
+    var existingRow = tableBody.find('tr[data-service="' + serviceData.cod + '"]');
         // atualizando uma nova linha
     if (existingRow.length > 0) {
         existingRow.find('cod_placeholder').text(serviceData.cod || '');
@@ -227,7 +227,7 @@ function updateTableService(serviceData) {
         existingRow.find('service_price_placeholder').text(calculateServicePrice(existingRow).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }));
         // adicionando uma nova linha
     } else {
-        var newRow = $('<tr data-product-code="' + serviceData.cod + '">');
+        var newRow = $('<tr data-service="' + serviceData.cod + '">');
         newRow.append('<td class="cod_placeholder">' + serviceData.cod + '</td>');
         newRow.append('<td class="descript_placeholder">' + serviceData.descript + '</td>');
         newRow.append('<td class="service_days_placeholder"><input type="number" name="service_days" class="service_days_input"></td>');

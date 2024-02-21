@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, jsonify
 from backend.models.cadastro import Cadastro
 from backend.models.proposta import buscar_clientes, buscar_produtos, buscar_servicos, proposta_comercial
+import traceback
 
 app = Flask(__name__)
 
@@ -39,17 +40,19 @@ def proposta():
                 'end_date': request.form['end_date'],
                 'period_days': request.form['period_days'],
                 'validity': request.form['validity'],
-                'product_id': request.form['product_id'],
+                'product_id': request.form['product_id[]'],
                 'product_code': request.form['product_code'],
                 'description': request.form['description'],
                 'type': request.form['type'],
                 'unit_price': request.form['unit_price'],
                 'price': request.form['price'],
                 'add_description': request.form['add_description'],
+                'refund_id': request.form['refund_id[]'],
                 'cod': request.form['cod'],
                 'descript': request.form['descript'],
                 'value': request.form['value'],
             }
+            print(request.method)
 
             client_data = buscar_clientes(form_data['cpf_cnpj'])
             print(f"Debug: Client Data - {client_data}")
@@ -80,7 +83,7 @@ def proposta():
                     print(f"Debug: Service Data - {service_data}")
 
                     if service_data:
-                        form_data['cod'] = service_data.get('cod')
+                        form_data['refund_id'] = service_data.get('cod')
                         form_data.update({
                             'descript': service_data.get('descript', ''),
                         })
@@ -95,7 +98,9 @@ def proposta():
 
     except Exception as e:
         error_message = str(e)
+        traceback_info = traceback.format_exc()
         print(f"Error: {error_message}")
+        print(f"Traceback: {traceback_info}")
         return render_template('error.html', error=error_message)
 
 
