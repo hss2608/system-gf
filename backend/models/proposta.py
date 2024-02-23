@@ -41,6 +41,7 @@ def buscar_produtos(product_code,):
         product_data = cursor.fetchone()
         if product_data:
             columns = ['id', 'product_code', 'description', 'type', 'add_description']
+            print(f"SQL Query: SELECT * FROM products WHERE product_code = '{product_code}'")
             return dict(zip(columns, product_data))
         else:
             return {}
@@ -52,6 +53,9 @@ def buscar_produtos(product_code,):
 
 
 def buscar_servicos(cod,):
+    if not cod:
+        return None
+
     connection, cursor = create_connection()
 
     try:
@@ -62,6 +66,7 @@ def buscar_servicos(cod,):
         service_data = cursor.fetchone()
         if service_data:
             columns = ['cod', 'descript']
+            print(f"SQL Query: SELECT * FROM refund WHERE cod = '{cod}'")
             return dict(zip(columns, service_data))
         else:
             return {}
@@ -103,13 +108,13 @@ def proposta_comercial(form_data):
             cursor.execute("""
                 INSERT INTO proposal_product (proposal_id, product_id)
                 VALUES (%s, %s);
-            """, (proposal_id, int(product_id)))
+            """, (proposal_id, product_id))
 
         for refund_id in form_data.getlist('refund_id[]'):
             cursor.execute("""
                 INSERT INTO proposal_refund (proposal_id, refund_id)
                 VALUES (%s, %s);
-            """, (proposal_id, int(refund_id)))
+            """, (proposal_id, refund_id))
 
         connection.commit()
         close_connection(connection, cursor)

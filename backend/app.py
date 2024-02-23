@@ -2,7 +2,9 @@ from flask import Flask, render_template, request, jsonify
 from backend.models.cadastro import Cadastro
 from backend.models.proposta import buscar_clientes, buscar_produtos, buscar_servicos, proposta_comercial
 import traceback
+import logging
 
+logging.basicConfig(level=logging.DEBUG)
 app = Flask(__name__)
 
 
@@ -20,9 +22,10 @@ def cadastro_route():
 def proposta():
     try:
         client_data = {}
-        product_data = {}
-        service_data = {}
+        product_data = []
+        service_data = []
         success_message = None
+        error_message = None
 
         if request.method == 'POST':
             form_data = {
@@ -44,9 +47,9 @@ def proposta():
                 'product_code': request.form['product_code'],
                 'description': request.form['description'],
                 'type': request.form['type'],
-                'unit_price': request.form['unit_price'],
-                'price': request.form['price'],
-                'add_description': request.form['add_description'],
+                # 'unit_price': request.form['unit_price'],
+                # 'price': request.form['price'],
+                # 'add_description': request.form['add_description'],
                 'refund_id': request.form['refund_id[]'],
                 'cod': request.form['cod'],
                 'descript': request.form['descript'],
@@ -67,30 +70,29 @@ def proposta():
                     'number_store': client_data.get('number_store', ''),
                 })
 
-                product_data = buscar_produtos(form_data['product_code'])
+                product = buscar_produtos(form_data['product_code'])
+                if product:
+                    product_data.append(product)
                 print(f"Debug: Product Data - {product_data}")
 
-                if product_data:
-                    form_data['product_id'] = product_data.get('id')
-                    form_data.update({
-                        'product_code': product_data.get('product_code', ''),
-                        'description': product_data.get('description', ''),
-                        'type': product_data.get('type', ''),
-                        'add_description': product_data.get('add_description', ''),
-                    })
-
-                    service_data = buscar_servicos(form_data['cod'])
-                    print(f"Debug: Service Data - {service_data}")
-
-                    if service_data:
-                        form_data['refund_id'] = service_data.get('cod')
-                        form_data.update({
-                            'descript': service_data.get('descript', ''),
-                        })
+                service = buscar_servicos(form_data['cod'])
+                if service:
+                    service_data.append(service)
+                print(f"Debug: Service Data - {service_data}")
 
             result = proposta_comercial(form_data)
-            if result.get('success'):
+            if isinstance(result, dict) and result.get('success'):
                 success_message = "Proposal submitted successfully!"
+            else:
+                error_message = "Failed to submit proposal form. Please try again."
+
+            try:
+                error_data = result.json()
+                if error_data and error_data.get('error'):
+                    error_message += " " + error_data.get('error')
+            except Exception as e:
+                print(f"Error extracting error message: {e}")
+            print(error_message)
 
         return render_template('proposta.html',
                                client_data=client_data, product_data=product_data,

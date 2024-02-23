@@ -313,7 +313,7 @@ ALTER SEQUENCE public.proposal_refund_proposal_id_seq OWNED BY public.proposal_r
 --
 
 CREATE TABLE public.refund (
-    cod smallint NOT NULL,
+    cod integer NOT NULL,
     descript character varying(100)
 );
 
