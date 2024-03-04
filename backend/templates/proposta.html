@@ -16,11 +16,16 @@
     <h1>Proposta Comercial</h1>
 
     <form method="POST" action="{{ url_for('proposta') }}" id="proposal-form">
-        <input type="hidden" name="client_id" id="client_id" value="{% if client_data and 'id' in client_data %}{{ client_data['id'] }}{% endif %}">
+        <label for="proposal_id">PROPOSTA N°</label>
+        <input type="text" name="proposal_id" id="proposal_id" readonly onblur="submitProposalId()"><br>
+        <input type="hidden" id="proposal_data" name="proposal_data" class="proposal_data" data-number='{{ proposal_data | tojson }}'>
+
+        <input type="hidden" name="client_id" id="client_id" value="{% if client_data and 'client_id' in client_data %}{{ client_data['client_id'] }}{% endif %}">
 
         <label for="cpf_cnpj" title="CPF/CNPJ">CPF/CNPJ:</label>
         <input type="text" name="cpf_cnpj" id="cpf_cnpj" required onblur="populateClientData()" autocomplete="tax-id" placeholder="CPF/CNPJ">
-        <input type="hidden" id="client_data" data-client="{{ client_data | tojson }}"><br>
+
+        <input type="hidden" id="client_data" name="client_data" class="client_data" data-client='{{ client_data | tojson }}'><br>
 
         <label for="company" title="EMPRESA">EMPRESA:</label>
         <input type="text" name="company" id="company" autocomplete="organization" readonly><br>
@@ -65,11 +70,11 @@
         <label for="validity" title="VALIDADE">VALIDADE DA PROPOSTA:</label>
         <input type="text" name="validity" id="validity"><br>
 
-        <input type="hidden" name="product_id[]" id="product_id" class="product_id" value="{% if product_data and 'id' in product_data %}{{ product_data['id'] }}{% endif %}">
+        <input type="hidden" name="product_id" id="product_id" class="product_id" value="{% if product_data and 'product_code' in product_data %}{{ product_data['product_code'] }}{% endif %}">
 
         <label for="product_code" title="product_code">CODIGO:</label>
         <input type="text" name="product_code" id="product_code" placeholder="EQUIPAMENTOS">
-        <input type="hidden" id="product_data" data-product="{{ product_data | tojson }}">
+        <input type="hidden" id="product_data" name="product_data" class="product_data" data-product='{{ product_data | tojson }}'>
         <input type="hidden" id="description" name="description">
         <input type="hidden" id="type" name="type">
         <input type="hidden" id="add_description" name="add_description">
@@ -100,11 +105,11 @@
             </tbody>
         </table><br>
 
-        <input type="hidden" name="refund_id[]" id="refund_id" class="refund_id" value="{% if service_data and 'cod' in service_data %}{{ service_data['cod'] }}{% endif %}">
+        <input type="hidden" name="refund_id" id="refund_id" class="refund_id" value="{% if service_data and 'cod' in service_data %}{{ service_data['cod'] }}{% endif %}">
 
         <label for="cod" title="cod">CODIGO:</label>
         <input type="text" name="cod" id="cod" placeholder="RESSARCIMENTO">
-        <input type="hidden" id="service_data" data-service="{{ service_data | tojson }}">
+        <input type="hidden" id="service_data" name="service_data" class="service_data" data-service='{{ service_data | tojson }}'>
         <input type="hidden" name="descript" id="descript">
         <button type="button" onclick="populateServiceData()">ADICIONAR</button>
 

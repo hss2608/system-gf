@@ -1,3 +1,13 @@
+function submitProposalId() {
+    fetch('/get_proposal_id')
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('proposal_id').value = data.proposal_id;
+    })
+    .catch(error => console.error('Error fetching proposal ID:', error));
+}
+document.addEventListener('DOMContentLoaded', submitProposalId);
+
 function populateClientData() { //funcao para apresentar os clientes no formulario
     var cpfCnpjInput = $('#cpf_cnpj');
     var clientDataInput = $('#client_data');
@@ -85,6 +95,7 @@ function populateProductData() { //funcao para apresentar os produtos no formula
                 if (data && data.success) {
                     var productData = data.product_data;
 
+                    console.log('Product Id:', productData.product_id);
                     console.log('Product Code:', productData.product_code);
                     console.log('Description:', productData.description);
                     console.log('Type:', productData.type);
@@ -196,6 +207,7 @@ function populateServiceData() {
                 if (data && data.success) {
                     var serviceData = data.service_data;
 
+                    console.log('Refund ID:', serviceData.refund_id);
                     console.log('Cod:', serviceData.cod);
                     console.log('Description:', serviceData.descript);
 
