@@ -102,26 +102,22 @@ def proposta_comercial(form_data):
                 form_data['delivery_date'], form_data['withdrawal_date'], form_data['start_date'],
                 form_data['end_date'], form_data['period_days'], form_data['validity'], form_data['value']
         ))
+        connection.commit()
 
-        result = cursor.fetchone()
-        proposal_id = result[0]
-        print(proposal_id)
+        proposal_id = cursor.fetchone()[0]
+        print("Proposal ID:", proposal_id)
 
-        # for product_id in form_data.get('product_id'):
-        cursor.execute("""
-            INSERT INTO proposal_product (proposal_id, product_id)
-            VALUES (%s, %s);
-        """, (
-            form_data[proposal_id], form_data['product_id']
-        ))
+        for product_id in form_data.get('product_id', []):
+            cursor.execute("""
+                INSERT INTO proposal_product (proposal_id, product_id)
+                VALUES (%s, %s);
+            """, (proposal_id, product_id))
 
-        # for cod in form_data.get('cod'):
-        cursor.execute("""
-            INSERT INTO proposal_refund (proposal_id, cod)
-            VALUES (%s, %s);
-        """, (
-            form_data[proposal_id], form_data['cod']
-        ))
+        for cod in form_data.get('cod', []):
+            cursor.execute("""
+                INSERT INTO proposal_refund (proposal_id, cod)
+                VALUES (%s, %s);
+            """, (proposal_id, cod))
 
         connection.commit()
         close_connection(connection, cursor)
