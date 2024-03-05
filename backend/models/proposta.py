@@ -82,7 +82,7 @@ def proposta_comercial(form_data):
     try:
         required_fields = ['proposal_id', 'client_id', 'status', 'delivery_address',
                            'delivery_date', 'withdrawal_date', 'start_date', 'end_date',
-                           'period_days', 'validity', 'product_id', 'cod', 'value']
+                           'period_days', 'validity', 'value']
 
         missing_fields = [field for field in required_fields if field not in form_data or not form_data[field]]
         if missing_fields:
