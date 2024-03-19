@@ -1,8 +1,10 @@
 from flask import Flask, render_template, request, jsonify
 from backend.models.cadastro import Cadastro
-from backend.models.proposta import buscar_clientes, buscar_produtos, buscar_servicos, proposta_comercial, proposal_number
+from backend.models.proposta import (buscar_clientes, buscar_produtos, buscar_servicos, proposta_comercial,
+                                     proposal_number, add_products, add_services)
 import traceback
 import logging
+import json
 
 logging.basicConfig(level=logging.DEBUG)
 app = Flask(__name__)
@@ -30,6 +32,7 @@ def proposta():
         if request.method == 'POST':
             form_data = {
                 'proposal_id': request.form['proposal_id'],
+                'client_id': request.form['client_id'],
                 'company': request.form['company'],
                 'cpf_cnpj': request.form['cpf_cnpj'],
                 'contact_name': request.form['contact_name'],
@@ -44,70 +47,24 @@ def proposta():
                 'end_date': request.form['end_date'],
                 'period_days': request.form['period_days'],
                 'validity': request.form['validity'],
-                'product_id': request.form['product_id'],
-                'product_code': request.form['product_code'],
-                'description': request.form['description'],
-                'type': request.form['type'],
-                'unit_price': request.form['unit_price'],
-                'price': request.form['price'],
-                'add_description': request.form['add_description'],
-                'refund_id': request.form['refund_id'],
-                'cod': request.form['cod'],
-                'descript': request.form['descript'],
                 'value': request.form['value'],
             }
+
+            client_data = json.loads(request.form.get('client_data', '{}'))
+            product_data = json.loads(request.form.get('product_data', '{}'))
+            service_data = json.loads(request.form.get('service_data', '{}'))
+
             print(request.method)
-
-            client_data = buscar_clientes(form_data['cpf_cnpj'])
-            print(f"Debug: Client Data - {client_data}")
-
-            if client_data:
-                form_data['client_id'] = client_data.get('client_id')
-                form_data.update({
-                    'company': client_data.get('company', ''),
-                    'contact_name': client_data.get('contact_name', ''),
-                    'phone': client_data.get('phone', ''),
-                    'email': client_data.get('email', ''),
-                    'number_store': client_data.get('number_store', ''),
-                })
-
-                product_data = buscar_produtos(form_data['product_code'])
-                print(f"Debug: Product Data - {product_data}")
-                if product_data:
-                    form_data['product_id'] = product_data.get('product_id')
-                    form_data.update({
-                        'product_code': product_data.get('product_code', ''),
-                        'description': product_data.get('description', ''),
-                        'add_description': product_data.get('add_description', ''),
-                        'type': product_data.get('type', ''),
-                    })
-
-                service_data = buscar_servicos(form_data['cod'])
-                print(f"Debug: Service Data - {service_data}")
-                if service_data:
-                    form_data['refund_id'] = service_data.get('refund_id')
-                    form_data.update({
-                        'cod': service_data.get('cod', ''),
-                        'descript': service_data.get('descript', ''),
-                    })
-
+            data = request.form
+            app.logger.info('Response data: %s', data)
             result = proposta_comercial(form_data)
             if isinstance(result, dict) and result.get('success'):
                 success_message = "Proposal submitted successfully!"
             else:
                 error_message = "Failed to submit proposal form. Please try again."
 
-            try:
-                error_data = result.json()
-                if error_data and error_data.get('error'):
-                    error_message += " " + error_data.get('error')
-            except Exception as e:
-                print(f"Error extracting error message: {e}")
-            print(error_message)
-        proposal_data = {'key': 'value'}
-        return render_template('proposta.html',
-                               client_data=client_data, product_data=product_data,
-                               service_data=service_data, proposal_data=proposal_data, success_message=success_message)
+        return render_template('proposta.html', client_data=client_data, product_data=product_data,
+                               service_data=service_data, success_message=success_message, error_message=error_message)
 
     except Exception as e:
         error_message = str(e)
@@ -117,19 +74,45 @@ def proposta():
         return render_template('error.html', error=error_message)
 
 
+@app.route('/submit_proposal', methods=['POST'])
+def submit_proposal():
+    try:
+        data = request.get_json()
+        response = proposta_comercial(data)
+        if not response.json['success']:
+            return response
+        proposal_id = response.json['proposal_id']
+
+        products_response = add_products(proposal_id, data['products'])
+        if not products_response.json['success']:
+            return products_response
+
+        services_response = add_services(proposal_id, data['services'])
+        if not services_response.json['success']:
+            return services_response
+
+        return services_response
+
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
 @app.route('/get_client_data', methods=['POST'])
 def get_client_data():
     try:
         cpf_cnpj = request.form.get('cpf_cnpj')
         client_data = buscar_clientes(cpf_cnpj)
-        data = request.form
-        app.logger.info('Received data from client: %s', data)
 
-        return jsonify(success=True, client_data=client_data)
+        if client_data:
+            app.logger.info('Client data retrieved successfully: %s', client_data)
+            return jsonify(success=True, client_data=client_data)
+        else:
+            app.logger.warning('Client data not found for Cpf/Cnpj: %s', cpf_cnpj)
+            return jsonify(success=False, error='Client data not found')
 
     except Exception as e:
-        print(f"Error: {e}")
-        return jsonify(success=False, error=str(e))
+        app.logger.error('Error fetching client data: %s', e)
+        return jsonify(success=False, error='Failed to fetch client data. Please try again.')
 
 
 @app.route('/get_product_data', methods=['POST'])
@@ -137,14 +120,17 @@ def get_product_data():
     try:
         product_code = request.form.get('product_code')
         product_data = buscar_produtos(product_code)
-        data = request.form
-        app.logger.info('Received data from product: %s', data)
 
-        return jsonify(success=True, product_data=product_data)
+        if product_data:
+            app.logger.info('Product data retrieved successfully: %s', product_data)
+            return jsonify(success=True, product_data=product_data)
+        else:
+            app.logger.warning('Product data not found for product code: %s', product_code)
+            return jsonify(success=False, error='Product data not found')
 
     except Exception as e:
-        print(f"Error: {e}")
-        return jsonify(success=False, error=str(e))
+        app.logger.error('Error fetching product data: %s', e)
+        return jsonify(success=False, error='Failed to fetch product data. Please try again.')
 
 
 @app.route('/get_service_data', methods=['POST'])
@@ -152,14 +138,17 @@ def get_service_data():
     try:
         cod = request.form.get('cod')
         service_data = buscar_servicos(cod)
-        data = request.form
-        app.logger.info('Received data from service: %s', data)
 
-        return jsonify(success=True, service_data=service_data)
+        if service_data:
+            app.logger.info('Service data retrieved successfully: %s', service_data)
+            return jsonify(success=True, service_data=service_data)
+        else:
+            app.logger.warning('Service data not found for cod: %s', cod)
+            return jsonify(success=False, error='Service data not found')
 
     except Exception as e:
-        print(f"Error: {e}")
-        return jsonify(success=False, error=str(e))
+        app.logger.error('Error fetching service data: %s', e)
+        return jsonify(success=False, error='Failed to fetch service data. Please try again.')
 
 
 @app.route('/get_proposal_id', methods=['GET'])

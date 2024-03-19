@@ -1,5 +1,7 @@
 from flask import jsonify
-from backend.db_utils import create_connection, close_connection
+from sqlalchemy import func
+from backend.db_utils import create_session
+from backend.models.estrutura_proposta import Client, Proposal, Product, Refund, ProposalProduct, ProposalRefund
 from datetime import datetime
 import logging
 
@@ -12,73 +14,74 @@ def analisar_data(date_str):
 
 
 def buscar_clientes(cpf_cnpj):
-    connection, cursor = create_connection()
+    session = create_session()
     try:
-        cursor.execute("""
-            SELECT client_id, company, cpf_cnpj, contact_name, phone, email, number_store
-            FROM clients WHERE cpf_cnpj = %s
-        """, (cpf_cnpj,))
-        client_data = cursor.fetchone()
-        if client_data:
-            columns = ['client_id', 'company', 'cpf_cnpj', 'contact_name', 'phone', 'email', 'number_store']
-            return dict(zip(columns, client_data))
+        client = session.query(Client).filter(Client.cpf_cnpj == cpf_cnpj).first()
+        if client:
+            return {
+                'client_id': client.client_id,
+                'company': client.company,
+                'cpf_cnpj': client.cpf_cnpj,
+                'contact_name': client.contact_name,
+                'phone': client.phone,
+                'email': client.email,
+                'number_store': client.number_store
+            }
         else:
             return {}
     except Exception as e:
         print(f"Error in buscar_clientes: {e}")
         return {}
     finally:
-        close_connection(connection, cursor)
+        session.close()
 
 
-def buscar_produtos(product_code,):
-    connection, cursor = create_connection()
+def buscar_produtos(product_code):
+    session = create_session()
 
     try:
-        cursor.execute("""
-            SELECT product_id, product_code, description, type, add_description
-            FROM products WHERE product_code = %s
-        """, (product_code,))
-        product_data = cursor.fetchone()
-        if product_data:
-            columns = ['product_id', 'product_code', 'description', 'type', 'add_description']
-            print(f"SQL Query: SELECT * FROM products WHERE product_code = '{product_code}'")
-            return dict(zip(columns, product_data))
+        product = session.query(Product).filter(Product.product_code == product_code).first()
+        if product:
+            return {
+                'product_id': product.product_id,
+                'product_code': product.product_code,
+                'description': product.description,
+                'type': product.type,
+                'add_description': product.add_description
+            }
         else:
             return {}
     except Exception as e:
         print(f"Error in buscar_produtos: {e}")
         return {}
     finally:
-        close_connection(connection, cursor)
+        session.close()
 
 
-def buscar_servicos(cod,):
+def buscar_servicos(cod):
     if not cod:
-        return None
+        return {}
 
-    connection, cursor = create_connection()
-
+    session = create_session()
     try:
-        cursor.execute("""
-            SELECT cod, descript, refund_id
-            FROM refund WHERE cod = %s
-        """, (cod,))
-        service_data = cursor.fetchone()
-        if service_data:
-            columns = ['cod', 'descript', 'refund_id']
-            print(f"SQL Query: SELECT * FROM refund WHERE cod = '{cod}'")
-            return dict(zip(columns, service_data))
+        service = session.query(Refund).filter(Refund.cod == cod).first()
+        if service:
+            return {
+                'cod': service.cod,
+                'descript': service.descript,
+                'refund_id': service.refund_id
+            }
         else:
             return {}
     except Exception as e:
         print(f"Error in buscar_servicos: {e}")
         return {}
     finally:
-        close_connection(connection, cursor)
+        session.close()
 
 
 def proposta_comercial(form_data):
+    session = create_session()
     try:
         required_fields = ['proposal_id', 'client_id', 'status', 'delivery_address',
                            'delivery_date', 'withdrawal_date', 'start_date', 'end_date',
@@ -90,65 +93,92 @@ def proposta_comercial(form_data):
             print(f"Error: {error_message}")
             return jsonify(success=False, error=error_message)
 
-        connection, cursor = create_connection()
+        proposal = Proposal(
+            proposal_id=form_data['proposal_id'],
+            client_id=form_data['client_id'],
+            status=form_data['status'],
+            delivery_address=form_data['delivery_address'],
+            delivery_date=form_data['delivery_date'],
+            withdrawal_date=form_data['withdrawal_date'],
+            start_date=form_data['start_date'],
+            end_date=form_data['end_date'],
+            period_days=form_data['period_days'],
+            validity=form_data['validity'],
+            value=form_data['value']
+        )
+        session.add(proposal)
+        session.commit()
 
-        cursor.execute("""
-                INSERT INTO proposal (proposal_id, client_id, status, delivery_address, delivery_date, withdrawal_date,
-                                      start_date, end_date, period_days, validity, value)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                RETURNING proposal_id;  
-            """, (
-                form_data['proposal_id'], form_data['client_id'], form_data['status'], form_data['delivery_address'],
-                form_data['delivery_date'], form_data['withdrawal_date'], form_data['start_date'],
-                form_data['end_date'], form_data['period_days'], form_data['validity'], form_data['value']
-        ))
-        connection.commit()
-
-        proposal_id = cursor.fetchone()[0]
+        proposal_id = proposal.proposal_id
         print("Proposal ID:", proposal_id)
 
-        for product_id in form_data.get('product_id', []):
-            cursor.execute("""
-                INSERT INTO proposal_product (proposal_id, product_id)
-                VALUES (%s, %s);
-            """, (proposal_id, product_id))
-
-        for cod in form_data.get('cod', []):
-            cursor.execute("""
-                INSERT INTO proposal_refund (proposal_id, cod)
-                VALUES (%s, %s);
-            """, (proposal_id, cod))
-
-        connection.commit()
-        close_connection(connection, cursor)
         print("Debug: Form submitted successfully")
-        return jsonify(success=True)
+        return jsonify(success=True, proposal_id=proposal_id)
 
     except Exception as e:
+        session.rollback()
         print(f"Error: {e}")
         # linha extra abaixo para tratar o erro JSON serializable
         return jsonify(success=False, error=str(e))
 
+    finally:
+        session.close()
+
+
+def add_products(proposal_id, products):
+    session = create_session()
+    try:
+        for product in products:
+            proposal_product = ProposalProduct(
+                proposal_id=proposal_id,
+                product_id=product['product_id']
+            )
+            session.add(proposal_product)
+
+        session.commit()
+        return jsonify(success=True)
+    except Exception as e:
+        session.rollback()
+        print(f"Error: {e}")
+        # linha extra abaixo para tratar o erro JSON serializable
+        return jsonify(success=False, error=str(e))
+
+    finally:
+        session.close()
+
+
+def add_services(proposal_id, services):
+    session = create_session()
+    try:
+
+        for service in services:
+            proposal_refund = ProposalRefund(
+                proposal_id=proposal_id,
+                cod=service['cod']
+            )
+            session.add(proposal_refund)
+
+        session.commit()
+
+        return jsonify(success=True)
+    except Exception as e:
+        session.rollback()
+        print(f"Error: {e}")
+        return jsonify(success=False, error=str(e))
+
+    finally:
+        session.close()
+
 
 def proposal_number():
-    connection, cursor = create_connection()
-
     try:
-        cursor.execute("""
-            SELECT MAX(proposal_id) AS last_id
-            FROM proposal;
-        """)
-
-        result = cursor.fetchone()
-        last_id = result[0] if result[0] is not None else 0
+        session = create_session()
+        max_id = session.query(func.max(Proposal.proposal_id)).scalar()
+        last_id = max_id if max_id else 0
         logging.debug(f"Last Proposal Id: {last_id}")
-
         current_id = last_id + 1
         logging.debug(f"Current Id: {current_id}")
-
-        connection.commit()
-        close_connection(connection, cursor)
-
+        session.close()
         return current_id
 
     except Exception as e:

@@ -19,13 +19,18 @@ function populateClientData() { //funcao para apresentar os clientes no formular
             url: '/get_client_data',
             data: { cpf_cnpj: inputValue },
             success: function (data) {
+                console.log('Received client data:', data);
                 if (data && data.success) {
                     var clientData = data.client_data;
+                    $('#client_id').val(clientData.client_id || '');
                     $('#company').val(clientData.company || '');
                     $('#contact_name').val(clientData.contact_name || '');
                     $('#phone').val(clientData.phone || '');
                     $('#email').val(clientData.email || '');
                     $('#number_store').val(clientData.number_store || '');
+
+                    console.log('Client Id:', clientData.client_id);
+                    console.log('Cpf / Cnpj:', clientData.cpf_cnpj);
                 } else {
                     console.error('Error fetching client data:', data.error);
                 }
@@ -39,23 +44,31 @@ function populateClientData() { //funcao para apresentar os clientes no formular
 
 
 function updateTable(productData) {
+    // bloco com condicao para nao ser adicionada uma linha vazia
+    if (!productData || Object.keys(productData).length === 0 || !productData.product_code) {
+        console.log('Dados do produto inválidos ou faltando... Não adicionando à tabela.');
+        return;
+    }
+
     var tableBody = $('#product_table_body');
     var existingRow = tableBody.find('tr[data-product="' + productData.product_code + '"]');
         // atualizando uma nova linha
     if (existingRow.length > 0) {
+        existingRow.find('.product_id_placeholder').text(productData.product_id || '');
         existingRow.find('.description_placeholder').text(productData.description || '');
         existingRow.find('.type_placeholder').text(productData.type || '');
         existingRow.find('.add_description_placeholder').text(productData.add_description || '');
-        existingRow.find('.unit_price_placeholder').html('<input type="text" name="unit_price" class="unit_price_input" onchange="updatePrice(this)">');
+        existingRow.find('.unit_price_placeholder').html('<input type="text" name="unit_price[]" class="unit_price_input" onchange="updatePrice(this)">');
         existingRow.find('.price_placeholder').text(calculatePrice(existingRow).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }));
         // adicionando uma nova linha
     } else {
         var newRow = $('<tr data-product="' + productData.product_code + '">');
+        newRow.append('<td class="product_id_placeholder">' + productData.product_id + '</td>');
         newRow.append('<td class="product_code_placeholder">' + productData.product_code + '</td>');
         newRow.append('<td class="description_placeholder">' + productData.description + '</td>');
         newRow.append('<td class="type_placeholder">' + productData.type + '</td>');
         newRow.append('<td class="add_description_placeholder">' + productData.add_description + '</td>');
-        newRow.append('<td class="unit_price_placeholder"><input type="text" name="unit_price" class="unit_price_input" onchange="updatePrice(this)"></td>');
+        newRow.append('<td class="unit_price_placeholder"><input type="text" name="unit_price[]" class="unit_price_input" onchange="updatePrice(this)"></td>');
         newRow.append('<td class="price_placeholder">' + calculatePrice(newRow).toLocaleString('pt-BR', { style:'currency', currency: 'BRL' }) + '</td>');
         // adicionando botão excluir
         var deleteButton = $('<button onclick="removeProduct(this.parentNode.parentNode)">Excluir</button>');
@@ -94,6 +107,14 @@ function populateProductData() { //funcao para apresentar os produtos no formula
                 console.log('Received product data:', data);
                 if (data && data.success) {
                     var productData = data.product_data;
+
+                    $('#product_id').val(productData.product_id);
+                    $('#product_code').val(productData.product_code);
+                    $('#description').val(productData.description);
+                    $('#type').val(productData.type);
+                    $('#add_description').val(productData.add_description);
+                    $('#unit_price').val(productData.unit_price);
+                    $('#price').val(productData.price);
 
                     console.log('Product Id:', productData.product_id);
                     console.log('Product Code:', productData.product_code);
@@ -207,6 +228,10 @@ function populateServiceData() {
                 if (data && data.success) {
                     var serviceData = data.service_data;
 
+                    $('#refund_id').val(serviceData.refund_id);
+                    $('#cod').val(serviceData.cod);
+                    $('#descript').val(serviceData.descript);
+
                     console.log('Refund ID:', serviceData.refund_id);
                     console.log('Cod:', serviceData.cod);
                     console.log('Description:', serviceData.descript);
@@ -220,7 +245,7 @@ function populateServiceData() {
                 }
             },
             error: function (xhr, status, error) {
-                console.error('Error fetching product data:', error),
+                console.error('Error fetching service data:', error),
                 console.error('AJAX Request Error:', status, error);
             }
         });
@@ -228,22 +253,28 @@ function populateServiceData() {
 }
 
 function updateTableService(serviceData) {
+    // bloco com condicao para nao ser adicionada uma linha vazia
+    if (!serviceData || Object.keys(serviceData).length === 0 || !serviceData.cod) {
+        console.log('Dados do serviço inválidos ou faltando... Não adicionando à tabela.');
+        return;
+    }
+
     var tableBody = $('#service_table_body');
     var existingRow = tableBody.find('tr[data-service="' + serviceData.cod + '"]');
         // atualizando uma nova linha
     if (existingRow.length > 0) {
         existingRow.find('cod_placeholder').text(serviceData.cod || '');
         existingRow.find('descript_placeholder').text(serviceData.descript || '');
-        existingRow.find('service_days_placeholder').html('<input type="number" name="service_days" class="service_days_input">');
-        existingRow.find('service_unit_price_placeholder').html('<input type="text" name="service_unit_price" class="service_unit_price_input" onchange="updateServicePrice(this)">');
+        existingRow.find('service_days_placeholder').html('<input type="number" name="service_days[]" class="service_days_input">');
+        existingRow.find('service_unit_price_placeholder').html('<input type="text" name="service_unit_price[]" class="service_unit_price_input" onchange="updateServicePrice(this)">');
         existingRow.find('service_price_placeholder').text(calculateServicePrice(existingRow).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }));
         // adicionando uma nova linha
     } else {
         var newRow = $('<tr data-service="' + serviceData.cod + '">');
         newRow.append('<td class="cod_placeholder">' + serviceData.cod + '</td>');
         newRow.append('<td class="descript_placeholder">' + serviceData.descript + '</td>');
-        newRow.append('<td class="service_days_placeholder"><input type="number" name="service_days" class="service_days_input"></td>');
-        newRow.append('<td class="service_unit_price_placeholder"><input type="text" name="service_unit_price" class="service_unit_price_input" onchange="updateServicePrice(this)"></td>');
+        newRow.append('<td class="service_days_placeholder"><input type="number" name="service_days[]" class="service_days_input"></td>');
+        newRow.append('<td class="service_unit_price_placeholder"><input type="text" name="service_unit_price[]" class="service_unit_price_input" onchange="updateServicePrice(this)"></td>');
         newRow.append('<td class="service_price_placeholder"></td>');
         // adicionando botao excluir
         var deleteButton = $('<button onclick="removeService(this.parentNode.parentNode)">Excluir</button>');
@@ -291,29 +322,94 @@ document.addEventListener('DOMContentLoaded', function() {
     form.addEventListener('submit', function(event) {
         event.preventDefault();
 
-        submitProposalForm();
+        submitProposal();
     });
 });
 
-function submitProposalForm() {
-    const formData = new FormData(document.getElementById('proposal-form'));
+function submitProposal() {
+    var proposalData = {
+        proposal_id: $('#proposal_id').val(),
+        client_id: $('#client_id').val(),
+        company: $('#company').val(),
+        cpf_cnpj: $('#cpf_cnpj').val(),
+        contact_name: $('#contact_name').val(),
+        phone: $('#phone').val(),
+        email: $('#email').val(),
+        number_store: $('#number_store').val(),
+        status: $('#status').val(),
+        delivery_date: $('#delivery_date').val(),
+        withdrawal_date: $('#withdrawal_date').val(),
+        start_date: $('#start_date').val(),
+        end_date: $('#end_date').val(),
+        period_days: $('#period_days').val(),
+        delivery_address: $('#delivery_address').val(),
+        validity: $('#validity').val(),
+        value: $('#value').val(),
+    };
 
-    fetch('/proposta', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log(data);
-        if (data.success) {
-            window.location.href = '/success';
-        } else {
-            alert('Failed to submit proposal form. Please try again.');
+    proposalData.products = collectProducts();
+
+    proposalData.services = collectServices();
+
+    console.log('Proposal Data:', proposalData);
+    $.ajax({
+        url: '/submit_proposal',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(proposalData),
+        success: function(response) {
+            console.log('Proposta enviada com sucesso:', response);
+        },
+        error: function(error) {
+            console.error('Erro ao enviar proposta:', error);
         }
-    })
-
-    .catch(error => {
-        console.error(error);
-        alert('An error occured while submitting the proposal form. Please try again later.');
     });
 }
+
+function collectProducts() {
+    var products = [];
+    $('#product_table_body tr' || '').each(function() {
+        var product = {
+            product_id: $(this).find('.product_id_placeholder').text(),
+            product_code: $(this).find('.product_code_placeholder').text(),
+            description: $(this).find('.description_placeholder').text(),
+            type: $(this).find('.type_placeholder').text(),
+            unit_price: $(this).find('.unit_price_placeholder').text(),
+            price: $(this).find('.price_placeholder').text(),
+            add_description: $(this).find('.add_description_placeholder').text()
+        };
+        products.push(product);
+    });
+    return products;
+}
+
+function collectServices() {
+    var services = [];
+    $('#service_table_body tr').each(function() {
+        var service = {
+            cod: $(this).find('.cod_placeholder').text(),
+            descript: $(this).find('.descript_placeholder').text(),
+            service_days: $(this).find('.service_days_placeholder').text(),
+            service_unit_price: $(this).find('.service_unit_price_placeholder').text(),
+            service_price: $(this).find('.service_price_placeholder').text()
+        };
+        services.push(service);
+    });
+    return services;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    $('#product_table_body tr').each(function() {
+        var isRowEmpty = !$.trim($(this).find('.product_code_placeholder').text());
+        if (isRowEmpty) {
+            $(this).remove();
+        }
+    });
+
+    $('#service_table_body tr').each(function() {
+        var isRowEmpty = !$.trim($(this).find('.cod_placeholder').text());
+        if (isRowEmpty) {
+            $(this).remove();
+        }
+    });
+})

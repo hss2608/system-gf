@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="content-type" content="application/json">
     <title>Proposta Comercial</title>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <style>
@@ -18,7 +17,6 @@
     <form method="POST" action="{{ url_for('proposta') }}" id="proposal-form">
         <label for="proposal_id">PROPOSTA N°</label>
         <input type="text" name="proposal_id" id="proposal_id" readonly onblur="submitProposalId()"><br>
-        <input type="hidden" id="proposal_data" name="proposal_data" class="proposal_data" data-number='{{ proposal_data | tojson }}'>
 
         <input type="hidden" name="client_id" id="client_id" value="{% if client_data and 'client_id' in client_data %}{{ client_data['client_id'] }}{% endif %}">
 
@@ -70,21 +68,14 @@
         <label for="validity" title="VALIDADE">VALIDADE DA PROPOSTA:</label>
         <input type="text" name="validity" id="validity"><br>
 
-        <input type="hidden" name="product_id" id="product_id" class="product_id" value="{% if product_data and 'product_code' in product_data %}{{ product_data['product_code'] }}{% endif %}">
-
         <label for="product_code" title="product_code">CODIGO:</label>
-        <input type="text" name="product_code" id="product_code" placeholder="EQUIPAMENTOS">
-        <input type="hidden" id="product_data" name="product_data" class="product_data" data-product='{{ product_data | tojson }}'>
-        <input type="hidden" id="description" name="description">
-        <input type="hidden" id="type" name="type">
-        <input type="hidden" id="add_description" name="add_description">
-        <input type="hidden" id="unit_price" name="type">
-        <input type="hidden" id="price" name="price">
+        <input type="text" name="product_code[]" id="product_code" class="product_code" placeholder="EQUIPAMENTOS">
         <button type="button" onclick="populateProductData()">ADICIONAR</button>
 
         <table border="1">
             <thead>
                 <tr>
+                    <th>ID CLIENTE</th>
                     <th>CODIGO</th>
                     <th>DESCRICAO</th>
                     <th>TIPO</th>
@@ -95,6 +86,7 @@
             </thead>
             <tbody id="product_table_body">
                 <tr>
+                    <td class="product_id_placeholder">{{ product_data.product_id or '' }}</td>
                     <td class="product_code_placeholder">{{ product_data.product_code or '' }}</td>
                     <td class="description_placeholder">{{ product_data.description or '' }}</td>
                     <td class="type_placeholder">{{ product_data.type or '' }}</td>
@@ -105,12 +97,8 @@
             </tbody>
         </table><br>
 
-        <input type="hidden" name="refund_id" id="refund_id" class="refund_id" value="{% if service_data and 'cod' in service_data %}{{ service_data['cod'] }}{% endif %}">
-
         <label for="cod" title="cod">CODIGO:</label>
-        <input type="text" name="cod" id="cod" placeholder="RESSARCIMENTO">
-        <input type="hidden" id="service_data" name="service_data" class="service_data" data-service='{{ service_data | tojson }}'>
-        <input type="hidden" name="descript" id="descript">
+        <input type="text" name="cod[]" id="cod" class="cod" placeholder="RESSARCIMENTO">
         <button type="button" onclick="populateServiceData()">ADICIONAR</button>
 
         <table border="1">
