@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Date, ForeignKey
+from sqlalchemy import Column, Integer, String, Date, ForeignKey, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -23,6 +23,7 @@ class Client(Base):
     state_registration = Column(String)
     registration_date = Column(Date)
     billing_address = Column(String)
+
     proposals = relationship('Proposal', back_populates='client')
 
 
@@ -65,6 +66,7 @@ class Proposal(Base):
     client = relationship('Client', back_populates='proposals')
     products = relationship('ProposalProduct', back_populates='proposal')
     refunds = relationship('ProposalRefund', back_populates='proposal')
+    contract = relationship('Contract', back_populates='proposal')
 
 
 class ProposalProduct(Base):
@@ -74,6 +76,7 @@ class ProposalProduct(Base):
     product_id = Column(Integer, ForeignKey('products.product_id'), primary_key=True)
 
     proposal = relationship('Proposal', back_populates='products')
+    # contract = relationship('Contract', back_populates='products')
 
 
 class ProposalRefund(Base):
@@ -83,3 +86,46 @@ class ProposalRefund(Base):
     cod = Column(Integer, ForeignKey('refund.cod'), primary_key=True)
 
     proposal = relationship('Proposal', back_populates='refunds')
+    # contract = relationship('Contract', back_populates='refunds')
+
+
+class Contract(Base):
+    __tablename__ = 'contract'
+
+    contract_id = Column(String, primary_key=True)
+    proposal_id = Column(Integer, ForeignKey('proposal.proposal_id'))
+    date_issue = Column(Date)
+    start_contract = Column(Date)
+    end_contract = Column(Date)
+    contract_days = Column(Integer)
+    contract_type = Column(String)
+    contract_status = Column(String)
+    address_obs = Column(Text)
+    observations = Column(Text)
+    oenf_obs = Column(Text)
+    contract_comments = Column(Text)
+
+    proposal = relationship('Proposal', back_populates='contract')
+    # products = relationship('ProposalProduct', back_populates='contract')
+    # refunds = relationship('ProposalRefund', back_populates='contract')
+    products_contract = relationship('ContractProducts', back_populates='contract')
+    refunds_contract = relationship('ContractRefund', back_populates='contract')
+
+
+class ContractProducts(Base):
+    __tablename__ = 'contract_product'
+
+    contract_id = Column(String, ForeignKey('contract.contract_id'), primary_key=True)
+    product_id = Column(Integer, ForeignKey('products.product_id'), primary_key=True)
+
+    contract = relationship('Contract', back_populates='products_contract')
+
+
+class ContractRefund(Base):
+    __tablename__ = 'contract_refund'
+
+    contract_id = Column(String, ForeignKey('contract.contract_id'), primary_key=True)
+    cod = Column(Integer, ForeignKey('refund.cod'), primary_key=True)
+
+    contract = relationship('Contract', back_populates='refunds_contract')
+

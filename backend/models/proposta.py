@@ -1,7 +1,7 @@
 from flask import jsonify
 from sqlalchemy import func
 from backend.db_utils import create_session
-from backend.models.estrutura_proposta import Client, Proposal, Product, Refund, ProposalProduct, ProposalRefund
+from backend.models.estrutura_db import Client, Proposal, Product, Refund, ProposalProduct, ProposalRefund
 from datetime import datetime
 import logging
 

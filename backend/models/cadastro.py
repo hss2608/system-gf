@@ -1,6 +1,6 @@
 from flask import render_template, request
 from backend.db_utils import create_session
-from backend.models.estrutura_proposta import Client
+from backend.models.estrutura_db import Client
 from datetime import datetime
 
 
@@ -18,6 +18,7 @@ def Cadastro():
             client_type = request.form['client_type']
             cpf_cnpj = request.form['cpf_cnpj']
             state_registration = request.form['state_registration']
+            registration_date = request.form['registration_date']
             contact_name = request.form['contact_name']
             phone = request.form['phone']
             email = request.form['email']
@@ -36,6 +37,7 @@ def Cadastro():
                 client_type=client_type,
                 cpf_cnpj=cpf_cnpj,
                 state_registration=state_registration,
+                registration_date=registration_date,
                 contact_name=contact_name,
                 phone=phone,
                 email=email,

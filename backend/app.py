@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, jsonify
 from backend.models.cadastro import Cadastro
 from backend.models.proposta import (buscar_clientes, buscar_produtos, buscar_servicos, proposta_comercial,
                                      proposal_number, add_products, add_services)
+from backend.models.contrato import buscar_proposta, buscar_clientes_proposta
 import traceback
 import logging
 import json
@@ -161,6 +162,47 @@ def get_proposal_id():
             return jsonify({'error': 'Failed to generate proposal ID'}), 500
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+
+@app.route('/contrato', methods=['GET', 'POST'])
+def contrato():
+    return render_template('contrato.html')
+
+
+@app.route('/get_proposal_data', methods=['POST'])
+def get_proposal_data():
+    try:
+        proposal_id = request.form.get('proposal_id')
+        proposal_data = buscar_proposta(proposal_id)
+
+        if proposal_data:
+            app.logger.info('Proposal data retrieved successfully: %s', proposal_data)
+            return jsonify(success=True, proposal_data=proposal_data)
+        else:
+            app.logger.warning('Proposal data not found for cod: %s', proposal_id)
+            return jsonify(success=False, error='Proposal data not found')
+
+    except Exception as e:
+        app.logger.error('Error fetching proposal data: %s', e)
+        return jsonify(success=False, error='Failed to fetch proposal data. Please try again.')
+
+
+@app.route('/get_client_proposal_data', methods=['GET', 'POST'])
+def get_client_proposal_data():
+    try:
+        client_id = request.form.get('client_id')
+        client_proposal_data = buscar_clientes_proposta(client_id)
+
+        if client_proposal_data:
+            app.logger.info('Client Proposal data retrieved successfully: %s', client_proposal_data)
+            return jsonify(success=True, client_proposal_data=client_proposal_data)
+        else:
+            app.logger.warning('Client Proposal data not found for cod: %s', client_id)
+            return jsonify(success=False, error='Client Proposal data not found')
+
+    except Exception as e:
+        app.logger.error('Error fetching client proposal data: %s', e)
+        return jsonify(success=False, error='Failed to fetch client proposal data. Please try again.')
 
 
 if __name__ == '__main__':
