@@ -1,0 +1,91 @@
+body {
+    font-family: 'Open Sans', Arial, sans-serif;
+    background-color: #ffffff;
+    color: #333333;
+    margin: 0;
+    padding: 0;
+}
+
+/* Estilos do cabeçalho com o logo */
+header {
+    background-color: #0044cc; /* Azul escuro */
+    color: #ffffff;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: 950px;
+}
+
+.header-content h2 {
+    margin: 0;
+    font-size: 24px;
+}
+
+.header-content img {
+    width: 150px; /* Ajuste conforme necessário */
+    height: auto;
+}
+
+/* Estilos do menu de navegação */
+.menu {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    background-color: #0044cc;
+    padding: 15px;
+    margin: 0;
+}
+
+.menu a {
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 18px;
+    padding: 10px 20px;
+    background-color: #ff6600; /* Laranja */
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.menu a:hover {
+    background-color: #cc5200; /* Laranja mais escuro ao passar o cursor */
+}
+
+/* Estilos do corpo principal */
+main {
+    padding: 20px;
+    text-align: center;
+}
+
+/* Estilos do rodapé */
+footer {
+    background-color: #0044cc; /* Azul escuro */
+    color: #ffffff;
+    text-align: center;
+    padding: 10px;
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+}
+
+/* Estilos dos botões principais no main */
+.button {
+    background-color: #ff6600; /* Laranja */
+    color: #ffffff;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: background-color 0.3s;
+    margin-top: 10px;
+}
+
+.button:hover {
+    background-color: #cc5200; /* Laranja mais escuro ao passar o cursor */
+}

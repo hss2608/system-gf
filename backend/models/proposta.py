@@ -1,7 +1,7 @@
 from flask import jsonify
 from sqlalchemy import func
 from backend.db_utils import create_session
-from backend.models.estrutura_db import Client, Proposal, Product, Refund, ProposalProduct, ProposalRefund
+from backend.models.estrutura_db import Client, Proposal, Product, Refund, ProposalProduct, ProposalRefund, PaymentCondition
 from datetime import datetime
 import logging
 
@@ -85,7 +85,7 @@ def proposta_comercial(form_data):
     try:
         required_fields = ['proposal_id', 'client_id', 'status', 'delivery_address',
                            'delivery_date', 'withdrawal_date', 'start_date', 'end_date',
-                           'period_days', 'validity', 'value']
+                           'period_days', 'validity', 'observations', 'oenf_obs', 'value']
 
         missing_fields = [field for field in required_fields if field not in form_data or not form_data[field]]
         if missing_fields:
@@ -96,6 +96,7 @@ def proposta_comercial(form_data):
         proposal = Proposal(
             proposal_id=form_data['proposal_id'],
             client_id=form_data['client_id'],
+            date_issue=form_data['date_issue'],
             status=form_data['status'],
             delivery_address=form_data['delivery_address'],
             delivery_date=form_data['delivery_date'],
@@ -104,7 +105,10 @@ def proposta_comercial(form_data):
             end_date=form_data['end_date'],
             period_days=form_data['period_days'],
             validity=form_data['validity'],
-            value=form_data['value']
+            observations=form_data['observations'],
+            oenf_obs=form_data['oenf_obs'],
+            value=form_data['value'],
+            payment_condition_id=form_data['payment_condition']
         )
         session.add(proposal)
         session.commit()
@@ -131,7 +135,12 @@ def add_products(proposal_id, products):
         for product in products:
             proposal_product = ProposalProduct(
                 proposal_id=proposal_id,
-                product_id=product['product_id']
+                product_id=product['product_id'],
+                quantity=product['quantity'],
+                unit_price=product['unit_price'],
+                price=product['price'],
+                extra_hours=product['extra_hours'],
+                rental_hours=product['rental_hours']
             )
             session.add(proposal_product)
 
@@ -154,7 +163,10 @@ def add_services(proposal_id, services):
         for service in services:
             proposal_refund = ProposalRefund(
                 proposal_id=proposal_id,
-                cod=service['cod']
+                cod=service['cod'],
+                service_quantity=service['service_quantity'],
+                service_unit_price=service['service_unit_price'],
+                service_price=service['service_price']
             )
             session.add(proposal_refund)
 
@@ -185,3 +197,18 @@ def proposal_number():
         print(f"Error: {e}")
         # linha extra abaixo para tratar o erro JSON serializable
         return jsonify(success=False, error=str(e))
+
+
+def buscar_cond_pagamentos():
+    session = create_session()
+
+    try:
+        payment_conditions = session.query(PaymentCondition).all()
+        return payment_conditions
+
+    except Exception as e:
+        print(f"Erro ao recuperar condições de pagamento: {e}")
+        return []
+
+    finally:
+        session.close()

@@ -42,6 +42,41 @@ function populateClientData() { //funcao para apresentar os clientes no formular
     }
 }
 
+function populatePaymentCondition() {
+    $.ajax({
+        type: 'GET',
+        url: '/get_payment_condition',
+        success: function(data) {
+            console.log('Received payment condition:', data);
+            if (data && data.success) {
+                var paymentCondition = data.payment_condition;
+                var selectElement = $('#payment_condition');
+
+                // Limpa as opções anteriores
+                selectElement.empty();
+
+                // Popula o select com as novas opções
+                paymentCondition.forEach(function(condition) {
+                    var formattedCod = condition.cod.toString().padStart(3, '0');
+                    var option_text = formattedCod + ' - ' + condition.description;
+                    var option = $('<option>').val(condition.cod).text(option_text);
+                    selectElement.append(option);
+                });
+
+            } else {
+                console.error('Error fetching payment condition:', data.error);
+            }
+        },
+        error: function(error) {
+            console.error('Error fetching payment condition:', error);
+        }
+    });
+}
+
+// Chama a função ao carregar o documento
+$(document).ready(function() {
+    populatePaymentCondition();
+});
 
 function updateTable(productData) {
     // bloco com condicao para nao ser adicionada uma linha vazia
@@ -58,8 +93,11 @@ function updateTable(productData) {
         existingRow.find('.description_placeholder').text(productData.description || '');
         existingRow.find('.type_placeholder').text(productData.type || '');
         existingRow.find('.add_description_placeholder').text(productData.add_description || '');
+        existingRow.find('.quantity_placeholder').html('<input type="number" name="quantity[]" class="quantity_input" onchange="updatePrice(this)">');
         existingRow.find('.unit_price_placeholder').html('<input type="text" name="unit_price[]" class="unit_price_input" onchange="updatePrice(this)">');
         existingRow.find('.price_placeholder').text(calculatePrice(existingRow).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }));
+        existingRow.find('.extra_hours_placeholder').html('<input type="text" name="extra_hours[]" class="extra_hours_input">');
+        existingRow.find('.rental_hours_placeholder').html('<input type="text" name="rental_hours[]" class="rental_hours_input">');
         // adicionando uma nova linha
     } else {
         var newRow = $('<tr data-product="' + productData.product_code + '">');
@@ -68,8 +106,11 @@ function updateTable(productData) {
         newRow.append('<td class="description_placeholder">' + productData.description + '</td>');
         newRow.append('<td class="type_placeholder">' + productData.type + '</td>');
         newRow.append('<td class="add_description_placeholder">' + productData.add_description + '</td>');
+        newRow.append('<td class="quantity_placeholder"><input type="number" name="quantity[]" class="quantity_input" onchange="updatePrice(this)"></td>');
         newRow.append('<td class="unit_price_placeholder"><input type="text" name="unit_price[]" class="unit_price_input" onchange="updatePrice(this)"></td>');
-        newRow.append('<td class="price_placeholder">' + calculatePrice(newRow).toLocaleString('pt-BR', { style:'currency', currency: 'BRL' }) + '</td>');
+        newRow.append('<td class="price_placeholder"></td>');
+        newRow.append('<td class="extra_hours_placeholder"><input type="text" name="extra_hours[]" class="extra_hours_input"></td>');
+        newRow.append('<td class="rental_hours_placeholder"><input type="text" name="rental_hours[]" class="rental_hours_input"></td>');
         // adicionando botão excluir
         var deleteButton = $('<button onclick="removeProduct(this.parentNode.parentNode)">Excluir</button>');
         newRow.append($('<td>').append(deleteButton));
@@ -80,18 +121,19 @@ function updateTable(productData) {
 
 function calculatePrice(row) {
     var periodDays = parseInt($('#period_days').val()) || 0;
-    var unitPrice = parseFloat($('.unit_price_input').val()) || 0;
-    return (unitPrice * periodDays).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    var quantity = parseInt($(row).find('.quantity_input').val()) || 0;
+    var unitPrice = parseFloat($(row).find('.unit_price_input').val()) || 0;
+    var total = ((quantity * unitPrice) * periodDays);
+    return total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
 function updatePrice(input) {
     var row = $(input).closest('tr');
-    var priceCell = row.find('.price_placeholder');
-    priceCell.text(calculatePrice());
+    var totalPrice = calculatePrice(row);
+    row.find('.price_placeholder').text(totalPrice);
     updateTotalValue();
     updatePricesForAllProducts();
 }
-
 
 function populateProductData() { //funcao para apresentar os produtos no formulario
     var productCodeInput = $('#product_code');
@@ -113,16 +155,22 @@ function populateProductData() { //funcao para apresentar os produtos no formula
                     $('#description').val(productData.description);
                     $('#type').val(productData.type);
                     $('#add_description').val(productData.add_description);
+                    $('#quantity').val(productData.qauntity);
                     $('#unit_price').val(productData.unit_price);
                     $('#price').val(productData.price);
+                    $('#extra_hours').val(productData.extra_hours);
+                    $('#rental_hours').val(productData.rental_hours);
 
                     console.log('Product Id:', productData.product_id);
                     console.log('Product Code:', productData.product_code);
                     console.log('Description:', productData.description);
                     console.log('Type:', productData.type);
                     console.log('Add Description:', productData.add_description);
-                    console.log('unit_price:', $('.unit_price_input').val());
-                    console.log('price:', calculatePrice());
+                    console.log('Quantity:', $('.quantity_input').val());
+                    console.log('Unit_price:', $('.unit_price_input').val());
+                    console.log('Price:', calculatePrice());
+                    console.log('Extra_hours:', $('.extra_hours_input').val());
+                    console.log('Rental_hours:', $('.rental_hours_input').val());
 
                     updateTable(productData);
                     updateTotalValue();
@@ -139,7 +187,6 @@ function populateProductData() { //funcao para apresentar os produtos no formula
         });
     }
 }
-
 
 function updatePeriodDays() {
     var startDateInput = document.getElementById('start_date');
@@ -174,11 +221,11 @@ function updatePeriodDays() {
     updatePricesForAllProducts()
 }
 
-
 function updateTotalValue() {
     var totalValueProducts = 0;
     $('#product_table_body tr').each(function() {
-        var price = parseFloat($(this).find('.price_placeholder').text().replace('R$', '').replace(',', '.'));
+        var priceText = $(this).find('.price_placeholder').text().replace('R$', '').replace(/\./g, '').replace(',', '.');
+        var price = parseFloat(priceText);
         if (!isNaN(price)) {
             totalValueProducts += price;
         }
@@ -186,11 +233,9 @@ function updateTotalValue() {
 
     var totalValueServices = 0;
     $('#service_table_body tr').each(function() {
-        var serviceDays = parseInt($(this).find('.service_days_input').val()) || 0;
-        var serviceUnitPrice = parseFloat($(this).find('.service_unit_price_input').val()) || 0;
-        var totalPrice = (serviceDays * serviceUnitPrice);
-        $(this).find('.service_price_placeholder').text(totalPrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }));
-        totalValueServices += totalPrice;
+        var servicePriceText = $(this).find('.service_price_placeholder').text().replace('R$', '').replace(/\./g, '').replace(',', '.');
+        var totalPrice = parseFloat(servicePriceText);
+        totalValueServices += isNaN(totalPrice) ? 0 : totalPrice;
     });
 
     var totalValue = totalValueProducts + totalValueServices;
@@ -203,11 +248,9 @@ function removeProduct(row) {
 }
 
 function updatePricesForAllProducts() {
-    var periodDays = parseInt($('#period_days').val()) || 0;
     $('#product_table_body tr').each(function() {
         var row = $(this);
-        var unitPrice = parseFloat(row.find('.unit_price_input').val()) || 0;
-        var totalPrice = (unitPrice * periodDays).toFixed(2);
+        var totalPrice = calculatePrice(row);
         row.find('.price_placeholder').text(totalPrice);
     });
     updateTotalValue();
@@ -231,10 +274,16 @@ function populateServiceData() {
                     $('#refund_id').val(serviceData.refund_id);
                     $('#cod').val(serviceData.cod);
                     $('#descript').val(serviceData.descript);
+                    $('#service_quantity').val(serviceData.service_quantity);
+                    $('#service_unit_price').val(serviceData.service_unit_price);
+                    $('#service_price').val(serviceData.service_price);
 
                     console.log('Refund ID:', serviceData.refund_id);
                     console.log('Cod:', serviceData.cod);
                     console.log('Description:', serviceData.descript);
+                    console.log('Service Quantity:', $('.service_quantity_input').val());
+                    console.log('Service Unit price:', $('.service_unit_price_input').val());
+                    console.log('Service price:', $('.service_price_input').val());
 
                     updateTableService(serviceData);
                     updateTotalValue();
@@ -265,7 +314,7 @@ function updateTableService(serviceData) {
     if (existingRow.length > 0) {
         existingRow.find('cod_placeholder').text(serviceData.cod || '');
         existingRow.find('descript_placeholder').text(serviceData.descript || '');
-        existingRow.find('service_days_placeholder').html('<input type="number" name="service_days[]" class="service_days_input">');
+        existingRow.find('service_quantity_placeholder').html('<input type="number" name="service_quantity[]" class="service_quantity_input">');
         existingRow.find('service_unit_price_placeholder').html('<input type="text" name="service_unit_price[]" class="service_unit_price_input" onchange="updateServicePrice(this)">');
         existingRow.find('service_price_placeholder').text(calculateServicePrice(existingRow).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }));
         // adicionando uma nova linha
@@ -273,7 +322,7 @@ function updateTableService(serviceData) {
         var newRow = $('<tr data-service="' + serviceData.cod + '">');
         newRow.append('<td class="cod_placeholder">' + serviceData.cod + '</td>');
         newRow.append('<td class="descript_placeholder">' + serviceData.descript + '</td>');
-        newRow.append('<td class="service_days_placeholder"><input type="number" name="service_days[]" class="service_days_input"></td>');
+        newRow.append('<td class="service_quantity_placeholder"><input type="number" name="service_quantity[]" class="service_quantity_input"></td>');
         newRow.append('<td class="service_unit_price_placeholder"><input type="text" name="service_unit_price[]" class="service_unit_price_input" onchange="updateServicePrice(this)"></td>');
         newRow.append('<td class="service_price_placeholder"></td>');
         // adicionando botao excluir
@@ -286,9 +335,9 @@ function updateTableService(serviceData) {
 }
 
 function calculateServicePrice(row) {
-    var serviceDays = parseInt($(row).find('.service_days_input').val()) || 0;
+    var serviceQuantity = parseInt($(row).find('.service_quantity_input').val()) || 0;
     var serviceUnitPrice = parseFloat($(row).find('.service_unit_price_input').val()) || 0;
-    return (serviceDays * serviceUnitPrice); //.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    return (serviceQuantity * serviceUnitPrice); //.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
 function updateServicePrice(input) {
@@ -299,7 +348,6 @@ function updateServicePrice(input) {
     updateTotalValue();
     updatePricesForAllServices();
 }
-
 
 function removeService(row) {
     $(row).remove();
@@ -342,8 +390,11 @@ function submitProposal() {
         start_date: $('#start_date').val(),
         end_date: $('#end_date').val(),
         period_days: $('#period_days').val(),
+        payment_condition: $('#payment_condition').val(),
         delivery_address: $('#delivery_address').val(),
         validity: $('#validity').val(),
+        observations: $('#observations').val(),
+        oenf_obs: $('#oenf_obs').val(),
         value: $('#value').val(),
     };
 
@@ -374,13 +425,17 @@ function collectProducts() {
             product_code: $(this).find('.product_code_placeholder').text(),
             description: $(this).find('.description_placeholder').text(),
             type: $(this).find('.type_placeholder').text(),
-            unit_price: $(this).find('.unit_price_placeholder').text(),
+            quantity: $(this).find('.quantity_input').val(),
+            unit_price: $(this).find('.unit_price_input').val(),
             price: $(this).find('.price_placeholder').text(),
-            add_description: $(this).find('.add_description_placeholder').text()
+            add_description: $(this).find('.add_description_placeholder').text(),
+            extra_hours: $(this).find('.extra_hours_input').val(),
+            rental_hours: $(this).find('.rental_hours_input').val()
         };
         products.push(product);
     });
     return products;
+    console.log('Products:', products);
 }
 
 function collectServices() {
@@ -389,8 +444,8 @@ function collectServices() {
         var service = {
             cod: $(this).find('.cod_placeholder').text(),
             descript: $(this).find('.descript_placeholder').text(),
-            service_days: $(this).find('.service_days_placeholder').text(),
-            service_unit_price: $(this).find('.service_unit_price_placeholder').text(),
+            service_quantity: $(this).find('.service_quantity_input').val(),
+            service_unit_price: $(this).find('.service_unit_price_input').val(),
             service_price: $(this).find('.service_price_placeholder').text()
         };
         services.push(service);
@@ -413,3 +468,23 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 })
+
+document.getElementById('proposal-form').addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    var formData = new FormData(this);
+    fetch('/proposta', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (response.ok) {
+            window.location.href = '/lista_propostas';
+        } else {
+            alert('Erro ao cadastrar proposta.');
+        }
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+    });
+});

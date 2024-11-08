@@ -23,6 +23,14 @@ def Cadastro():
             phone = request.form['phone']
             email = request.form['email']
             billing_address = request.form['billing_address']
+            municipio = request.form['municipio']
+            uf = request.form['uf']
+            cep = request.form['cep']
+            bairro = request.form['bairro']
+            billing_municipio = request.form['billing_municipio']
+            billing_uf = request.form['billing_uf']
+            billing_cep = request.form['billing_cep']
+            billing_bairro = request.form['billing_bairro']
 
             print(f"Debug: current_date={current_date}")
 
@@ -41,7 +49,15 @@ def Cadastro():
                 contact_name=contact_name,
                 phone=phone,
                 email=email,
-                billing_address=billing_address
+                billing_address=billing_address,
+                municipio=municipio,
+                uf=uf,
+                cep=cep,
+                bairro=bairro,
+                billing_municipio=billing_municipio,
+                billing_uf=billing_uf,
+                billing_cep=billing_cep,
+                billing_bairro=billing_bairro
             )
 
             session.add(client)

@@ -5,11 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Proposta Comercial</title>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-    <style>
-        table, th, td {
-            border: 1px solid black;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='tabelas.css') }}">
 </head>
 <body>
     <h1>Proposta Comercial</h1>
@@ -65,8 +61,23 @@
         <label for="period_days">PERIODO:</label>
         <input type="text" name="period_days" id="period_days" readonly><br>
 
+        <label for="payment_condition">CONDIÇÃO DE PAGAMENTO</label>
+        <select name="payment_condition" id="payment_condition">
+        {% for condition in payment_condition %}
+            <option value="">Condições...</option>
+        {% endfor %}
+        </select><br>
+
         <label for="validity" title="VALIDADE">VALIDADE DA PROPOSTA:</label>
         <input type="text" name="validity" id="validity"><br>
+
+        <label for="observations">OBSERVACOES:</label><br>
+        <textarea name="observations" id="observations" maxlength="200" rows="4" cols="50" placeholder="Observacoes..."></textarea><br>
+
+        <label for="oenf_obs">OBSERVACOES DA OENF:</label><br>
+        <textarea name="oenf_obs" id="oenf_obs" maxlength="200" rows="4" cols="50" placeholder="Observacoes da OENF..."></textarea><br>
+
+        <canvas id="dividing_line" width="1400" height="0.5" style="border:1px solid grey"></canvas><br>
 
         <label for="product_code" title="product_code">CODIGO:</label>
         <input type="text" name="product_code[]" id="product_code" class="product_code" placeholder="EQUIPAMENTOS">
@@ -75,13 +86,16 @@
         <table border="1">
             <thead>
                 <tr>
-                    <th>ID CLIENTE</th>
+                    <th>ID</th>
                     <th>CODIGO</th>
                     <th>DESCRICAO</th>
                     <th>TIPO</th>
                     <th>DESCRICAO COMPLEMENTAR</th>
+                    <th>QUANTIDADE</th>
                     <th>R$ UNIT</th>
                     <th>R$</th>
+                    <th>VAL HR EXTRAS</th>
+                    <th>HRS FRANQUIA</th>
                 </tr>
             </thead>
             <tbody id="product_table_body">
@@ -91,8 +105,11 @@
                     <td class="description_placeholder">{{ product_data.description or '' }}</td>
                     <td class="type_placeholder">{{ product_data.type or '' }}</td>
                     <td class="add_description_placeholder">{{ product_data.add_description or '' }}</td>
+                    <td class="quantity_placeholder"></td>
                     <td class="unit_price_placeholder"></td>
                     <td class="price_placeholder"></td>
+                    <td class="extra_hours_placeholder"></td>
+                    <td class="rental_hours_placeholder"></td>
                 </tr>
             </tbody>
         </table><br>
@@ -106,7 +123,7 @@
                 <tr>
                     <th>CODIGO</th>
                     <th>DESCRICAO</th>
-                    <th>DIAS</th>
+                    <th>QUANTIDADE</th>
                     <th>R$ UNIT</th>
                     <th>R$</th>
                 </tr>
@@ -115,7 +132,7 @@
                 <tr>
                     <td class="cod_placeholder">{{ service_data.cod or '' }}</td>
                     <td class="descript_placeholder">{{ service_data.descript or '' }}</td>
-                    <td class="service_days_placeholder"></td>
+                    <td class="service_quantity_placeholder"></td>
                     <td class="service_unit_price_placeholder"></td>
                     <td class="service_price_placeholder"></td>
                 </tr>
@@ -125,7 +142,10 @@
         <label for="value" title="value">R$</label>
         <input type="text" id="value" name="value" readonly><br>
 
-        <button type="submit">CONFIRMAR</button>
+        <button type="submit">CONFIRMAR</button><br><br>
+
+        <a href="/lista_propostas">↩</a>
+
         <script src="{{ url_for('static', filename='proposta.js') }}"></script>
 
     </form>

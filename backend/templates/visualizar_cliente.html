@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Visualizar Cliente</title>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+</head>
+<body>
+    <h2>Informações do Cliente</h2>
+    <p><strong>Nome da empresa:</strong> {{ cliente.company }}</p>
+    <p><strong>Razão Social:</strong> {{ cliente.corporate_name }}</p>
+    <p><strong>Numero da Loja:</strong> {{ cliente.number_store }}</p>
+    <p><strong>Tipo de Pessoa:</strong> {{cliente.person_type}}</p>
+    <p><strong>Tipo de Cliente:</strong> {{ cliente.client_type }}</p>
+    <p><strong>CPF/CNPJ:</strong> {{ cliente.cpf_cnpj }}</p>
+    <p><strong>Inscricao Estadual:</strong> {{cliente.state_registration}}</p>
+    <p><strong>Endereço Empresa:</strong> {{cliente.company_address}}</p>
+    <p><strong>Municipio:</strong> {{cliente.municipio}}</p>
+    <p><strong>UF:</strong> {{cliente.uf}}</p>
+    <p><strong>CEP:</strong> {{cliente.cep}}</p>
+    <p><strong>Bairro:</strong> {{cliente.bairro}}</p>
+    <p><strong>Data de registro:</strong> {{ cliente.registration_date }}</p>
+    <p><strong>Contato:</strong> {{ cliente.contact_name }}</p>
+    <p><strong>Telefone:</strong> {{ cliente.phone }}</p>
+    <p><strong>Email:</strong> {{ cliente.email }}</p>
+    <p><strong>Endereço de cobranca:</strong> {{cliente.billing_address}}</p>
+    <p><strong>Bairro:</strong> {{cliente.billing_bairro}}</p>
+    <p><strong>Municipio:</strong> {{cliente.billing_municipio}}</p>
+    <p><strong>UF:</strong> {{cliente.billing_uf}}</p>
+    <p><strong>CEP:</strong> {{cliente.billing_cep}}</p>
+
+    <a href="/lista_clientes">↩</a>
+</body>
+</html>

@@ -7,7 +7,7 @@
 </head>
 <body>
     <h2>Cadastro</h2>
-    <form method="POST" action="{{ url_for('cadastro_route') }}">
+    <form method="POST" id="client-form" action="{{ url_for('cadastro_route') }}">
         <label for="company">NOME DA EMPRESA:</label>
         <input type="text" id="company" name="company" required><br>
 
@@ -24,7 +24,19 @@
         </select><br>
 
         <label for="company_address">ENDERECO DA EMPRESA:</label>
-        <input type="text" id="company_address" name="company_address"><br>
+        <input type="text" id="company_address" name="company_address">&nbsp;&nbsp;&nbsp;&nbsp;
+
+        <label for="municipio">MUNICIPIO:</label>
+        <input type="text" id="municipio" name="municipio">&nbsp;&nbsp;&nbsp;&nbsp;
+
+        <label for="uf">UF:</label>
+        <input type="text" id="uf" name="uf">&nbsp;&nbsp;&nbsp;&nbsp;
+
+        <label for="cep">CEP:</label>
+        <input type="text" id="cep" name="cep">&nbsp;&nbsp;&nbsp;&nbsp;
+
+        <label for="bairro">BAIRRO:</label>
+        <input type="text" id="bairro" name="bairro"><br>
 
         <label for="client_type">TIPO DE CLIENTE:</label>
         <select name="client_type" id="client_type">
@@ -56,9 +68,44 @@
         <label for="billing_address">ENDERECO DE COBRANCA:</label>
         <input type="text" id="billing_address" name="billing_address"><br>
 
-        <input type="submit" value="CONFIRMAR">
+        <label for="billing_bairro">BAIRRO:</label>
+        <input type="text" id="billing_bairro" name="billing_bairro"><br>
+
+        <label for="billing_municipio">MUNICIPIO:</label>
+        <input type="text" id="billing_municipio" name="billing_municipio"><br>
+
+        <label for="billing_uf">UF:</label>
+        <input type="text" id="billing_uf" name="billing_uf"><br>
+
+        <label for="billing_cep">CEP:</label>
+        <input type="text" id="billing_cep" name="billing_cep"><br>
+
+        <input type="submit" value="CONFIRMAR"><br><br>
+
+        <a href="/lista_clientes">↩</a>
 
     </form>
+    <script>
+    document.getElementById('client-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        var formData = new FormData(this);
+        fetch('/cadastro', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (response.ok) {
+                window.location.href = '/lista_clientes';
+            } else {
+                alert('Erro ao cadastrar cliente.');
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+        });
+    });
+    </script>
 </body>
 </html>
 

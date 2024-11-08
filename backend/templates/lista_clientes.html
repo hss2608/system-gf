@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clientes</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='lista_clientes.css') }}">
+</head>
+<body>
+    <div id="acoes">
+        <button id="incluir">Incluir</button>
+        <button id="visualizar" disabled>Visualizar</button>
+        <button id="alterar" disabled>Alterar</button>
+    </div>
+    <h2>Clientes</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Cod</th>
+                <th>Empresa</th>
+                <th>CNPJ/CPF</th>
+                <th>Endereco Empresa</th>
+                <th>Contato</th>
+                <th>Telefone</th>
+                <th>Email</th>
+                <th>Endereco de Cobranca</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cliente in clientes %}
+                <tr class="cliente" data-client-id="{{ cliente.client_id }}">
+                    <td>{{ cliente.client_id }}</td>
+                    <td>{{ cliente.company }}</td>
+                    <td>{{ cliente.cpf_cnpj }}</td>
+                    <td>{{ cliente.company_address }}</td>
+                    <td>{{ cliente.contact_name }}</td>
+                    <td>{{ cliente.phone }}</td>
+                    <td>{{ cliente.email }}</td>
+                    <td>{{ cliente.billing_address }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table><br>
+    <a href="/">↩</a>
+    <script src="{{ url_for('static', filename='lista_clientes.js') }}"></script>
+</body>
+</html>

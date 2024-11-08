@@ -3,19 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
     <title>Prototipo Sistema GF</title>
 </head>
 <body>
+
+    <!-- Cabeçalho com logo e título -->
     <header>
-        <h1>Bem-Vindo</h1>
+        <div class="header-content">
+            <a>
+                <img src="{{ url_for('static', filename='logo_geraforca.png') }}" alt="Logo Geraforça" width="150">
+            </a>
+            <h2>Bem-Vindo</h2>
+        </div>
     </header>
 
-    <main>
-        <p>Corpo do sistema sera aqui</p>
-    </main>
+    <!-- Menu de navegação -->
+    <nav class="menu">
+        <a href="/lista_clientes">Clientes</a>
+        <a href="/lista_propostas">Propostas</a>
+        <a href="/lista_contratos">Contratos</a>
+    </nav>
 
+    <!-- Corpo principal -->
+    <main>
+        <p>Corpo do sistema será aqui</p>
+        <button class="button">Ação Principal</button>
+    </main> 
+
+    <!-- Rodapé -->
     <footer>
-        <p>&copy; 2023 Geraforca</p>
+        <p>&copy; 2023 Geraforça</p>
     </footer>
+
 </body>
 </html>

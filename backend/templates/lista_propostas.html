@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Propostas</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='lista_propostas.css') }}">
+</head>
+<body>
+    <div id="acoes">
+        <button id="incluir">Incluir</button>
+        <button id="visualizar" disabled>Visualizar</button>
+        <button id="alterar" disabled>Alterar</button>
+        <button id="imprimir" disabled>Imp Proposta</button>
+    </div>
+    <h2>Proposta</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Proposta N°</th>
+                <th>Cliente</th>
+                <th>Empresa</th>
+                <th>Contato</th>
+                <th>Telefone</th>
+                <th>Email</th>
+                <th>Status</th>
+                <th>End de Entrega</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for proposta, company, contact_name, phone, email in propostas %}
+                <tr class="proposta" data-proposal-id="{{ proposta.proposal_id }}">
+                    <td>{{ proposta.proposal_id }}</td>
+                    <td>{{ proposta.client_id }}</td>
+                    <td>{{ company }}</td>
+                    <td>{{ contact_name }}</td>
+                    <td>{{ phone }}</td>
+                    <td>{{ email }}</td>
+                    <td>{{ proposta.status }}</td>
+                    <td>{{ proposta.delivery_address }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table><br>
+    <a href="/">↩</a>
+    <script src="{{ url_for('static', filename='lista_propostas.js') }}"></script>
+</body>
+</html>
