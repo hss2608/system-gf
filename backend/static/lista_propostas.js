@@ -5,6 +5,7 @@ document.querySelectorAll('.proposta').forEach(item => {
         document.getElementById('visualizar').disabled = false;
         document.getElementById('alterar').disabled = false;
         document.getElementById('imprimir').disabled = false;
+        document.getElementById('imprimir_pedido').disabled = false;
 
         const proposalId = this.getAttribute('data-proposal-id').split('/')[0];
         console.log(proposalId)
@@ -16,6 +17,9 @@ document.querySelectorAll('.proposta').forEach(item => {
         };
         document.getElementById('imprimir').onclick = function() {
             window.location.href = '/proposta/imprimir/' + proposalId;
+        };
+        document.getElementById('imprimir_pedido').onclick = function() {
+            window.location.href = '/pedido/imprimir/' + proposalId;
         };
     });
 });

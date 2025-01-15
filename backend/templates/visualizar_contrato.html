@@ -4,101 +4,108 @@
     <meta charset="UTF-8">
     <title>Visualizar Contrato</title>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='proposta.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='visualizar_contrato.css') }}">
 </head>
 <body>
-    <h2>Informações do Contrato</h2>
-    {% for contrato in contratos %}
-        <div class="contrato-visualizacao" data-contract-id="{{ contrato['contract_id'] }}">
+    <div class="container">
+        <h2>Informações do Contrato</h2>
+        {% for contrato in contratos %}
+            <div class="contrato-visualizacao" data-contract-id="{{ contrato['contract_id'] }}">
 
-            <p><strong>Dt Emissão:</strong> {{ contrato['contrato']['date_issue'] }}</p>
-            <p><strong>N° Contrato:</strong> {{ contrato['contrato']['contract_id'] }}</p>
-            <p><strong>N° Proposta:</strong> {{ contrato['contrato']['proposal_id'] }}</p>
-            <p><strong>Contato:</strong> {{ contrato['contact_name'] }}</p>
-            <p><strong>Telefone:</strong> {{ contrato['phone'] }}</p>
-            <p><strong>Status:</strong> {{ contrato['contrato']['contract_status'] }}</p>
-            <p><strong>Cod Cliente:</strong> {{ contrato['client_id'] }}</p>
-            <p><strong>Numero da Loja:</strong> {{ contrato['number_store'] }}</p>
-            <p><strong>Nome da empresa:</strong> {{ contrato['company'] }}</p>
-            <p><strong>Endereço Empresa:</strong> {{ contrato['company_address'] }}</p>
-            <p><strong>CPF/CNPJ:</strong> {{ contrato['cpf_cnpj'] }}</p>
-            <p><strong>Inscrição Estadual:</strong> {{ contrato['state_registration'] }}</p>
-            <p><strong>Tipo de Locação:</strong> {{ contrato['contrato']['contract_type'] }}</p>
-            <p><strong>Inicio Contrato:</strong> {{ contrato['contrato']['start_contract'] }}</p>
-            <p><strong>Fim Contrato:</strong> {{ contrato['contrato']['end_contract'] }}</p>
-            <p><strong>Dias Contrato:</strong> {{ contrato['contrato']['contract_days'] }}</p>
-            <p><strong>Endereço de Cobrança:</strong> {{ contrato['billing_address'] }}</p>
-            <p><strong>Bairro:</strong> {{ contrato['billing_bairro'] }}</p>
-            <p><strong>Municipio:</strong> {{ contrato['billing_municipio'] }}</p>
-            <p><strong>UF:</strong> {{ contrato['billing_uf'] }}</p>
-            <p><strong>CEP:</strong> {{ contrato['billing_cep'] }}</p>
-            <p><strong>Endereco de Entrega:</strong> {{ contrato['delivery_address'] }}</p>
-            <p><strong>Det. Entrega:</strong> {{ contrato['contrato']['address_obs'] }}</p>
-            <p><strong>Observações:</strong> {{ contrato['contrato']['observations'] }}</p>
-            <p><strong>Obs OENF:</strong> {{ contrato['contrato']['oenf_obs'] }}</p>
-            <p><strong>Comentários:</strong> {{ contrato['contrato']['contract_comments'] }}</p>
-        </div>
-    {% endfor %}
+                <p><strong>Dt Emissão:</strong> {{ contrato['contrato']['date_issue'] }}</p>
+                <p><strong>N° Contrato:</strong> {{ contrato['contrato']['contract_id'] }}</p>
+                <p><strong>N° Proposta:</strong> {{ contrato['contrato']['proposal_id'] }}</p>
+                <p><strong>Contato:</strong> {{ contrato['contact_name'] }}</p>
+                <p><strong>Telefone:</strong> {{ contrato['phone'] }}</p>
+                <p><strong>Status:</strong> {{ contrato['contrato']['contract_status'] }}</p>
+                <p><strong>Cod Cliente:</strong> {{ contrato['client_id'] }}</p>
+                <p><strong>Numero da Loja:</strong> {{ contrato['number_store'] }}</p>
+                <p><strong>Nome da empresa:</strong> {{ contrato['company'] }}</p>
+                <p><strong>Endereço Empresa:</strong> {{ contrato['company_address'] }}</p>
+                <p><strong>CPF/CNPJ:</strong> {{ contrato['cpf_cnpj'] }}</p>
+                <p><strong>Inscrição Estadual:</strong> {{ contrato['state_registration'] }}</p>
+                <p><strong>Tipo de Locação:</strong> {{ contrato['contrato']['contract_type'] }}</p>
+                <p><strong>Inicio Contrato:</strong> {{ contrato['contrato']['start_contract'] }}</p>
+                <p><strong>Fim Contrato:</strong> {{ contrato['contrato']['end_contract'] }}</p>
+                <p><strong>Dias Contrato:</strong> {{ contrato['contrato']['contract_days'] }}</p>
+                <p><strong>Endereço de Cobrança:</strong> {{ contrato['billing_address'] }}</p>
+                <p><strong>Bairro:</strong> {{ contrato['billing_bairro'] }}</p>
+                <p><strong>Municipio:</strong> {{ contrato['billing_municipio'] }}</p>
+                <p><strong>UF:</strong> {{ contrato['billing_uf'] }}</p>
+                <p><strong>CEP:</strong> {{ contrato['billing_cep'] }}</p>
+                <p><strong>Endereco de Entrega:</strong> {{ contrato['delivery_address'] }}</p>
+                <p><strong>Bairro:</strong> {{ contrato['delivery_bairro'] }}</p>
+                <p><strong>Municipio:</strong> {{ contrato['delivery_municipio'] }}</p>
+                <p><strong>UF:</strong> {{ contrato['delivery_uf'] }}</p>
+                <p><strong>CEP:</strong> {{ contrato['delivery_cep'] }}</p>
+                <p><strong>Det. Entrega:</strong> {{ contrato['contrato']['address_obs'] }}</p>
+                <p><strong>Observações:</strong> {{ contrato['contrato']['observations'] }}</p>
+                <p><strong>Obs OENF:</strong> {{ contrato['contrato']['oenf_obs'] }}</p>
+                <p><strong>Comentários:</strong> {{ contrato['contrato']['contract_comments'] }}</p>
+            </div>
+        {% endfor %}
 
-    <h3>Equipamentos</h3>
-    <table>
-        <thead>
-            <tr>
-                <th>Codigo</th>
-                <th>Descricao</th>
-                <th>Quantidade</th>
-                <th>Preco Unitario</th>
-                <th>R$</th>
-                <th>Hr Extra</th>
-                <th>Hrs Franquia</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for contrato in contratos %}
-                {% for item in contrato['produtos'] %}
-                    <tr>
-                        <td>{{ item['product_code'] }}</td>
-                        <td>{{ item['description'] }}</td>
-                        <td>{{ item['quantity'] }}</td>
-                        <td>{{ item['unit_price'] }}</td>
-                        <td>{{ item['price'] }}</td>
-                        <td>{{ item['extra_hours'] }}</td>
-                        <td>{{ item['rental_hours'] }}</td>
-                    </tr>
+        <h3>Equipamentos</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Codigo</th>
+                    <th>Descricao</th>
+                    <th>Quantidade</th>
+                    <th>Preco Unitario</th>
+                    <th>R$</th>
+                    <th>Hr Extra</th>
+                    <th>Hrs Franquia</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for contrato in contratos %}
+                    {% for item in contrato['produtos'] %}
+                        <tr>
+                            <td>{{ item['product_code'] }}</td>
+                            <td>{{ item['description'] }}</td>
+                            <td>{{ item['quantity'] }}</td>
+                            <td>{{ item['unit_price'] }}</td>
+                            <td>{{ item['price'] }}</td>
+                            <td>{{ item['extra_hours'] }}</td>
+                            <td>{{ item['rental_hours'] }}</td>
+                        </tr>
+                    {% endfor %}
                 {% endfor %}
-            {% endfor %}
-        </tbody>
-    </table>
+            </tbody>
+        </table>
 
-    <h4>Ressarcimentos</h4>
-    <table>
-        <thead>
-            <tr>
-                <th>Codigo</th>
-                <th>Descricao</th>
-                <th>Quantidade</th>
-                <th>Preco Unitario</th>
-                <th>R$</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for contrato in contratos %}
-                {% for service in contrato['servicos'] %}
-                    <tr>
-                        <td>{{ service['cod'] }}</td>
-                        <td>{{ service['descript'] }}</td>
-                        <td>{{ service['service_quantity'] }}</td>
-                        <td>{{ service['service_unit_price'] }}</td>
-                        <td>{{ service['service_price'] }}</td>
-                    </tr>
+        <h4>Ressarcimentos</h4>
+        <table>
+            <thead>
+                <tr>
+                    <th>Codigo</th>
+                    <th>Descricao</th>
+                    <th>Quantidade</th>
+                    <th>Preco Unitario</th>
+                    <th>R$</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for contrato in contratos %}
+                    {% for service in contrato['servicos'] %}
+                        <tr>
+                            <td>{{ service['cod'] }}</td>
+                            <td>{{ service['descript'] }}</td>
+                            <td>{{ service['service_quantity'] }}</td>
+                            <td>{{ service['service_unit_price'] }}</td>
+                            <td>{{ service['service_price'] }}</td>
+                        </tr>
+                    {% endfor %}
                 {% endfor %}
-            {% endfor %}
-        </tbody>
-    </table>
-    {% for contrato in contratos %}
-        <p><strong>Valor Total:</strong> {{ contrato['contrato']['value'] }}</p>
-    {% endfor %}
-    <script src="{{ url_for('static', filename='visualizar_contrato.js') }}"></script>
-    <a href="/lista_contratos">↩</a>
+            </tbody>
+        </table>
+        {% for contrato in contratos %}
+            <p><strong>Valor Total:</strong> {{ contrato['contrato']['value'] }}</p>
+        {% endfor %}
+        <script src="{{ url_for('static', filename='visualizar_contrato.js') }}"></script>
+        <a href="/lista_contratos" class="btn-back">↩ Voltar</a>
+    </div>
 </body>
 </html>

@@ -1,9 +1,10 @@
 from backend.db_utils import create_session
 from backend.models.estrutura_db import (Proposal, Client, ProposalProduct, ProposalRefund, Product, Refund,
-                                         PaymentCondition)
-from flask import render_template
+                                         PaymentCondition, SalesOrder)
+from flask import render_template, jsonify
+from sqlalchemy import func
 from sqlalchemy.orm import aliased
-from datetime import datetime
+import logging
 
 
 def listar_todas_propostas():
@@ -76,7 +77,9 @@ def buscar_proposta_por_id(proposal_id):
         proposta_dict = {
             'proposta': {
                 'proposal_id': proposal_id_formatado, 'client_id': proposta.client_id, 'status': proposta.status,
-                'delivery_address': proposta.delivery_address,
+                'delivery_address': proposta.delivery_address, 'delivery_bairro': proposta.delivery_bairro,
+                'delivery_municipio': proposta.delivery_municipio, 'delivery_cep': proposta.delivery_cep,
+                'delivery_uf': proposta.delivery_uf,
                 'delivery_date': proposta.delivery_date.strftime("%d/%m/%Y"),
                 'withdrawal_date': proposta.withdrawal_date.strftime("%d/%m/%Y"),
                 'start_date': proposta.start_date.strftime("%d/%m/%Y"),
@@ -93,6 +96,10 @@ def buscar_proposta_por_id(proposal_id):
             'corporate_name': cliente.corporate_name,
             'state_registration': cliente.state_registration,
             'billing_address': cliente.billing_address,
+            'billing_municipio': cliente.billing_municipio,
+            'billing_uf': cliente.billing_uf,
+            'billing_cep': cliente.billing_cep,
+            'billing_bairro': cliente.billing_bairro,
             'company_address': cliente.company_address,
             'municipio': cliente.municipio,
             'uf': cliente.uf,
@@ -192,7 +199,9 @@ def proposal_to_dict(proposal):
         proposal_dict = {
             'proposal_id': proposal.proposal_id,
             'status': proposal.status,
-            'delivery_address': proposal.delivery_address,
+            'delivery_address': proposal.delivery_address, 'delivery_bairro': proposal.delivery_bairro,
+            'delivery_cep': proposal.delivery_cep, 'delivery_municipio': proposal.delivery_municipio,
+            'delivery_uf': proposal.delivery_uf,
             'delivery_date': proposal.delivery_date.strftime("%d/%m/%Y") if proposal.delivery_date else None,
             'withdrawal_date': proposal.withdrawal_date.strftime("%d/%m/%Y") if proposal.withdrawal_date else None,
             'start_date': proposal.start_date.strftime("%d/%m/%Y") if proposal.start_date else None,
@@ -233,3 +242,5 @@ def proposal_to_dict(proposal):
 
     finally:
         session.close()
+
+

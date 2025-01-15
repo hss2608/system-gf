@@ -69,6 +69,10 @@ class Proposal(Base):
     date_issue = Column(Date)
     status = Column(String)
     delivery_address = Column(String)
+    delivery_bairro = Column(String)
+    delivery_municipio = Column(String)
+    delivery_cep = Column(String)
+    delivery_uf = Column(String)
     delivery_date = Column(Date)
     withdrawal_date = Column(Date)
     start_date = Column(Date)
@@ -85,6 +89,7 @@ class Proposal(Base):
     refunds = relationship('ProposalRefund', back_populates='proposal')
     contract = relationship('Contract', back_populates='proposal')
     payment_condition = relationship('PaymentCondition', back_populates='proposal')
+    order = relationship('SalesOrder', back_populates='proposal')
 
 
 class ProposalProduct(Base):
@@ -133,11 +138,8 @@ class Contract(Base):
     contract_comments = Column(Text)
 
     proposal = relationship('Proposal', back_populates='contract')
-    # products = relationship('ProposalProduct', back_populates='contract')
-    # refunds = relationship('ProposalRefund', back_populates='contract')
     products_contract = relationship('ContractProducts', back_populates='contract')
     refunds_contract = relationship('ContractRefund', back_populates='contract')
-    order = relationship('SalesOrder', back_populates='contract')
 
 
 class ContractProducts(Base):
@@ -162,9 +164,15 @@ class SalesOrder(Base):
     __tablename__ = 'sales_order'
 
     order_id = Column(Integer, primary_key=True)
-    contract_id = Column(Integer, ForeignKey('contract.contract_id'))
+    proposal_id = Column(Integer, ForeignKey('proposal.proposal_id'))
 
-    contract = relationship('Contract', back_populates='order')
+    proposal = relationship('Proposal', back_populates='order')
+
+    def to_dict(self):
+        return {
+            "order_id": self.order_id,
+            "proposal_id": self.proposal_id
+        }
 
 
 class PaymentCondition(Base):

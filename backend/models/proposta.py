@@ -1,7 +1,8 @@
 from flask import jsonify
 from sqlalchemy import func
 from backend.db_utils import create_session
-from backend.models.estrutura_db import Client, Proposal, Product, Refund, ProposalProduct, ProposalRefund, PaymentCondition
+from backend.models.estrutura_db import (Client, Proposal, Product, Refund, ProposalProduct, ProposalRefund,
+                                         PaymentCondition)
 from datetime import datetime
 import logging
 
@@ -83,9 +84,10 @@ def buscar_servicos(cod):
 def proposta_comercial(form_data):
     session = create_session()
     try:
-        required_fields = ['proposal_id', 'client_id', 'status', 'delivery_address',
-                           'delivery_date', 'withdrawal_date', 'start_date', 'end_date',
-                           'period_days', 'validity', 'observations', 'oenf_obs', 'value']
+        current_date = datetime.now().strftime("%d/%m/%Y")
+        required_fields = ['proposal_id', 'client_id', 'status', 'delivery_address', 'delivery_bairro', 'delivery_cep',
+                           'delivery_municipio', 'delivery_uf', 'delivery_date', 'withdrawal_date', 'start_date',
+                           'end_date', 'period_days', 'validity', 'observations', 'oenf_obs', 'value']
 
         missing_fields = [field for field in required_fields if field not in form_data or not form_data[field]]
         if missing_fields:
@@ -96,9 +98,13 @@ def proposta_comercial(form_data):
         proposal = Proposal(
             proposal_id=form_data['proposal_id'],
             client_id=form_data['client_id'],
-            date_issue=form_data['date_issue'],
+            date_issue=current_date,
             status=form_data['status'],
             delivery_address=form_data['delivery_address'],
+            delivery_bairro=form_data['delivery_bairro'],
+            delivery_municipio=form_data['delivery_municipio'],
+            delivery_cep=form_data['delivery_cep'],
+            delivery_uf=form_data['delivery_uf'],
             delivery_date=form_data['delivery_date'],
             withdrawal_date=form_data['withdrawal_date'],
             start_date=form_data['start_date'],
@@ -212,3 +218,6 @@ def buscar_cond_pagamentos():
 
     finally:
         session.close()
+
+
+

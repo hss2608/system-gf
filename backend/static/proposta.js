@@ -8,6 +8,16 @@ function submitProposalId() {
 }
 document.addEventListener('DOMContentLoaded', submitProposalId);
 
+//function submitOrderId() {
+//    fetch('/get_order_id')
+//    .then(response => response.json())
+//    .then(data => {
+//        document.getElementById('order_id').value = data.order_id;
+//    })
+//    .catch(error => console.error('Error fetching order ID:', error));
+//}
+//document.addEventListener('DOMContentLoaded', submitOrderId);
+
 function populateClientData() { //funcao para apresentar os clientes no formulario
     var cpfCnpjInput = $('#cpf_cnpj');
     var clientDataInput = $('#client_data');
@@ -112,7 +122,7 @@ function updateTable(productData) {
         newRow.append('<td class="extra_hours_placeholder"><input type="text" name="extra_hours[]" class="extra_hours_input"></td>');
         newRow.append('<td class="rental_hours_placeholder"><input type="text" name="rental_hours[]" class="rental_hours_input"></td>');
         // adicionando botão excluir
-        var deleteButton = $('<button onclick="removeProduct(this.parentNode.parentNode)">Excluir</button>');
+        var deleteButton = $('<button class="codigos_excluir" onclick="removeProduct(this.parentNode.parentNode)">Excluir</button>');
         newRow.append($('<td>').append(deleteButton));
 
         tableBody.append(newRow);
@@ -326,7 +336,7 @@ function updateTableService(serviceData) {
         newRow.append('<td class="service_unit_price_placeholder"><input type="text" name="service_unit_price[]" class="service_unit_price_input" onchange="updateServicePrice(this)"></td>');
         newRow.append('<td class="service_price_placeholder"></td>');
         // adicionando botao excluir
-        var deleteButton = $('<button onclick="removeService(this.parentNode.parentNode)">Excluir</button>');
+        var deleteButton = $('<button class="codigos_excluir" onclick="removeService(this.parentNode.parentNode)">Excluir</button>');
         newRow.append($('<td>').append(deleteButton));
 
         tableBody.append(newRow);
@@ -392,6 +402,10 @@ function submitProposal() {
         period_days: $('#period_days').val(),
         payment_condition: $('#payment_condition').val(),
         delivery_address: $('#delivery_address').val(),
+        delivery_bairro: $('#delivery_bairro').val(),
+        delivery_municipio: $('#delivery_municipio').val(),
+        delivery_cep: $('#delivery_cep').val(),
+        delivery_uf: $('#delivery_uf').val(),
         validity: $('#validity').val(),
         observations: $('#observations').val(),
         oenf_obs: $('#oenf_obs').val(),

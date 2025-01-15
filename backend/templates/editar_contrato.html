@@ -5,174 +5,284 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar Contrato</title>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='tabelas.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='editar_contrato.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
-    <h2>Editar Proposta</h2>
+    <h2>Editar Contrato</h2>
     <form method="POST" id="edit_contract_form">
         {% for contrato in contract %}
+            <!-- Informações da Proposta -->
+            <div class="form-section">
+                <h3>Informações do Contrato</h3>
+                <div class="form-grid">
+                    <div>
+                        <label for="date_issue">DATA DE EMISSÃO::</label>
+                        <input type="text" id="date_issue" name="date_issue" value="{{ contrato['contrato']['date_issue'] }}" readonly><br>
+                    </div><br>
+                    <div>
+                        <label for="contract_id">N° CONTRATO:</label>
+                        <input type="text" id="contract_id" name="contract_id" value="{{ contrato['contrato']['contract_id'] }}" readonly><br>
+                    </div><br>
+                    <div>
+                        <label for="proposal_id">ATENDIMENTO:</label>
+                        <input type="text" id="proposal_id" name="proposal_id" value="{{ contrato['contrato']['proposal_id'] }}" readonly><br>
+                    </div><br>
+                    <div>
+                        <label for="contract_status">STATUS:</label>
+                        <select name="contract_status" id="contract_status">
+                            <option value="Contrato Novo" {{ 'selected' if contrato['contrato']['contract_status'] == 'Contrato Novo' else '' }}>Contrato Novo</option>
+                            <option value="Encaminhado" {{ 'selected' if contrato['contrato']['contract_status'] == 'Encaminhado' else '' }}>Encaminhado</option>
+                            <option value="Assinado" {{ 'selected' if contrato['contrato']['contract_status'] == 'Assinado' else '' }}>Assinado</option>
+                            <option value="Cancelado" {{ 'selected' if contrato['contrato']['contract_status'] == 'Cancelado' else '' }}>Cancelado</option>
+                            <option value="Encerrado" {{ 'selected' if contrato['contrato']['contract_status'] == 'Encerrado' else '' }}>Encerrado</option>
+                        </select>
+                    </div><br>
+                    <div>
+                        <label for="contract_type">TIPO DE LOCAÇÃO:</label>
+                        <select name="contract_type" id="contract_type">
+                            <option value="Diaria" {{ 'selected' if contrato['contrato']['contract_type'] == 'Diaria' else '' }}>Diaria</option>
+                            <option value="Fixo" {{ 'selected' if contrato['contrato']['contract_type'] == 'Fixo' else '' }}>Fixo</option>
+                        </select>
+                    </div><br>
+                    <div>
+                        <label for="start_contract">INICIO CONTRATO:</label>
+                        <input type="text" id="start_contract" name="start_contract" pattern="\d{2}/\d{2}/\d{4}" value="{{ contrato['contrato']['start_contract'] }}" readonly>
+                    </div><br>
+                    <div>
+                        <label for="end_contract">FIM CONTRATO:</label>
+                        <input type="text" id="end_contract" name="end_contract" pattern="\d{2}/\d{2}/\d{4}" value="{{ contrato['contrato']['end_contract'] }}" readonly>
+                    </div><br>
+                    <div>
+                        <label for="contract_days">DIAS CONTRATO:</label>
+                        <input type="text" id="contract_days" name="contract_days" pattern="\d{2}/\d{2}/\d{4}" value="{{ contrato['contrato']['contract_days'] }}" readonly>
+                    </div>
+                </div>
+            </div>
 
-            <label for="date_issue">DATA DE EMISSÃO::</label>
-            <input type="text" id="date_issue" name="date_issue" value="{{ contrato['contrato']['date_issue'] }}" readonly><br>
+            <!-- Informações do Cliente -->
+            <div class="form-section">
+                <h3>Informações do Cliente</h3>
+                <div class="form-grid">
+                    <div>
+                        <label for="client_id">ID CLIENTE:</label>
+                        <input type="text" id="client_id" name="client_id" value="{{ contrato['client_id'] }}" readonly>
+                    </div><br>
+                    <div>
+                        <label for="number_store">LOJA:</label>
+                        <input type="text" id="number_store" name="number_store"  value="{{ contrato['number_store'] }}" readonly><br>
+                    </div><br>
+                    <div class="long-input">
+                        <label for="company">NOME DA EMPRESA:</label>
+                        <input type="text" id="company" name="company" value="{{ contrato['company'] }}" required readonly><br>
+                    </div>
+                    <div>
+                        <label for="cpf_cnpj">CPF/CNPJ:</label>
+                        <input type="text" id="cpf_cnpj" name="cpf_cnpj" value="{{ contrato['cpf_cnpj'] }}" readonly><br>
+                    </div><br>
+                    <div>
+                        <label for="state_registration">INSCRIÇÃO ESTADUAL:</label>
+                        <input type="text" id="state_registration" name="state_registration" value="{{ contrato['state_registration'] }}" readonly><br>
+                    </div><br>
+                    <div class="long-input">
+                        <label for="company_address">ENDEREÇO DA EMPRESA:</label>
+                        <input type="text" id="company_address" name="company_address"  value="{{ contrato['company_address'] }}" readonly><br>
+                    </div>
+                    <div class="long-input">
+                        <label for="bairro">BAIRRO:</label>
+                        <input type="text" id="bairro" name="bairro" value="{{ contrato['bairro'] }}" readonly><br>
+                    </div><br>
+                    <div class="long-input">
+                        <label for="municipio">MUNICÍPIO:</label>
+                        <input type="text" id="municipio" name="municipio"  value="{{ contrato['municipio'] }}" readonly><br>
+                    </div><br>
+                    <div>
+                        <label for="uf">UF:</label>
+                        <input type="text" id="uf" name="uf"  value="{{ contrato['uf'] }}" readonly><br>
+                    </div><br>
+                    <div>
+                        <label for="cep">CEP:</label>
+                        <input type="text" id="cep" name="cep"  value="{{ contrato['cep'] }}" readonly><br>
+                    </div><br>
+                    <div class="long-input">
+                        <label for="contact_name">CONTATO:</label>
+                        <input type="text" id="contact_name" name="contact_name" value="{{ contrato['contact_name'] }}" readonly><br>
+                    </div>
+                    <div>
+                        <label for="phone">TELEFONE:</label>
+                        <input type="text" id="phone" name="phone" value="{{ contrato['phone'] }}" required readonly><br>
+                    </div><br>
+                    <div>
+                        <label for="email">EMAIL:</label>
+                        <input type="email" id="email" name="email" value="{{ contrato['email'] }}" required readonly><br>
+                    </div>
+                </div>
+            </div>
 
-            <label for="contract_id">N° CONTRATO:</label>
-            <input type="text" id="contract_id" name="contract_id" value="{{ contrato['contrato']['contract_id'] }}" readonly><br>
+            <!-- Endereço de Cobrança -->
+            <div class="form-section">
+                <h3>Informações do Endereço de Cobrança</h3>
+                <div class="form-grid">
+                    <div class="long-input">
+                        <label for="billing_address">ENDEREÇO DE COBRANÇA:</label>
+                        <input type="text" id="billing_address" name="billing_address" value="{{ contrato['billing_address'] }}" required readonly><br>
+                    </div><br>
+                    <div class="long-input">
+                        <label for="billing_bairro">BAIRRO:</label>
+                        <input type="text" id="billing_bairro" name="billing_bairro" value="{{ contrato['billing_bairro'] }}" required readonly><br>
+                    </div><br>
+                    <div class="long-input">
+                        <label for="billing_municipio">MUNICIPIO:</label>
+                        <input type="text" id="billing_municipio" name="billing_municipio" value="{{ contrato['billing_municipio'] }}" required readonly><br>
+                    </div><br>
+                    <div>
+                        <label for="billing_uf">UF:</label>
+                        <input type="text" id="billing_uf" name="billing_uf" value="{{ contrato['billing_uf'] }}" required readonly><br>
+                    </div><br>
+                    <div>
+                        <label for="billing_cep">CEP:</label>
+                        <input type="text" id="billing_cep" name="billing_cep" value="{{ contrato['billing_cep'] }}" required readonly><br>
+                    </div>
+                </div>
+            </div>
 
-            <label for="proposal_id">ATENDIMENTO:</label>
-            <input type="text" id="proposal_id" name="proposal_id" value="{{ contrato['contrato']['proposal_id'] }}" readonly><br>
+            <!-- Demais Informações -->
+            <div class="form-section">
+                <h3>Outras Informações do Contrato</h3>
+                <div class="form-grid">
+                    <div class="long-input">
+                        <label for="delivery_address">ENDEREÇO DE ENTREGA:</label>
+                        <input type="text" id="delivery_address" name="delivery_address" value="{{ contrato['delivery_address'] }}" readonly><br>
+                    </div><br>
+                    <div class="long-input">
+                        <label for="delivery_bairro">BAIRRO:</label>
+                        <input type="text" id="delivery_bairro" name="delivery_bairro" value="{{ contrato['delivery_bairro'] }}" readonly><br>
+                    </div><br>
+                    <div class="long-input">
+                        <label for="delivery_municipio">MUNICIPIO:</label>
+                        <input type="text" id="delivery_municipio" name="delivery_municipio" value="{{ contrato['delivery_municipio'] }}" readonly><br>
+                    </div><br>
+                    <div>
+                        <label for="delivery_uf">UF:</label>
+                        <input type="text" id="delivery_uf" name="delivery_uf" value="{{ contrato['delivery_uf'] }}" readonly><br>
+                    </div><br>
+                    <div>
+                        <label for="delivery_cep">CEP:</label>
+                        <input type="text" id="delivery_cep" name="delivery_cep" value="{{ contrato['delivery_cep'] }}" readonly><br>
+                    </div>
+                </div><br>
 
-            <label for="contact_name">CONTATO:</label>
-            <input type="text" id="contact_name" name="contact_name" value="{{ contrato['contact_name'] }}" readonly><br>
-
-            <label for="phone">TELEFONE:</label>
-            <input type="text" id="phone" name="phone" value="{{ contrato['phone'] }}" required readonly><br>
-
-            <label for="contract_status">STATUS:</label>
-            <select name="contract_status" id="contract_status">
-                <option value="Contrato Novo" {{ 'selected' if contrato['contrato']['contract_status'] == 'Contrato Novo' else '' }}>Contrato Novo</option>
-                <option value="Encaminhado" {{ 'selected' if contrato['contrato']['contract_status'] == 'Encaminhado' else '' }}>Encaminhado</option>
-                <option value="Assinado" {{ 'selected' if contrato['contrato']['contract_status'] == 'Assinado' else '' }}>Assinado</option>
-                <option value="Cancelado" {{ 'selected' if contrato['contrato']['contract_status'] == 'Cancelado' else '' }}>Cancelado</option>
-                <option value="Encerrado" {{ 'selected' if contrato['contrato']['contract_status'] == 'Encerrado' else '' }}>Encerrado</option>
-            </select><br>
-
-            <label for="client_id">ID CLIENTE:</label>
-            <input type="text" id="client_id" name="client_id" value="{{ contrato['client_id'] }}" readonly>
-
-            <label for="number_store">LOJA:</label>
-            <input type="text" id="number_store" name="number_store"  value="{{ contrato['number_store'] }}" readonly><br>
-
-            <label for="company">NOME DA EMPRESA:</label>
-            <input type="text" id="company" name="company" value="{{ contrato['company'] }}" required readonly><br>
-
-            <label for="company_address">LOJA:</label>
-            <input type="text" id="company_address" name="company_address"  value="{{ contrato['company_address'] }}" readonly><br>
-
-            <label for="cpf_cnpj">CPF/CNPJ:</label>
-            <input type="text" id="cpf_cnpj" name="cpf_cnpj" value="{{ contrato['cpf_cnpj'] }}" readonly><br>
-
-            <label for="state_registration">INSCRIÇÃO ESTADUAL:</label>
-            <input type="text" id="state_registration" name="state_registration" value="{{ contrato['state_registration'] }}" readonly><br>
-
-            <label for="contract_type">STATUS:</label>
-            <select name="contract_type" id="contract_type">
-                <option value="Diaria" {{ 'selected' if contrato['contrato']['contract_type'] == 'Diaria' else '' }}>Diaria</option>
-                <option value="Fixo" {{ 'selected' if contrato['contrato']['contract_type'] == 'Fixo' else '' }}>Fixo</option>
-            </select><br>
-
-            <label for="start_contract">INICIO CONTRATO:</label>
-            <input type="text" id="start_contract" name="start_contract" pattern="\d{2}/\d{2}/\d{4}" value="{{ contrato['contrato']['start_contract'] }}" readonly>
-
-            <label for="end_contract">FIM CONTRATO:</label>
-            <input type="text" id="end_contract" name="end_contract" pattern="\d{2}/\d{2}/\d{4}" value="{{ contrato['contrato']['end_contract'] }}" readonly>
-
-            <label for="contract_days">DIAS CONTRATO:</label>
-            <input type="text" id="contract_days" name="contract_days" pattern="\d{2}/\d{2}/\d{4}" value="{{ contrato['contrato']['contract_days'] }}" readonly>
-
-            <label for="billing_address">ENDEREÇO DE COBRANÇA:</label>
-            <input type="text" id="billing_address" name="billing_address" value="{{ contrato['billing_address'] }}" required readonly><br>
-
-            <label for="billing_bairro">BAIRRO:</label>
-            <input type="text" id="billing_bairro" name="billing_bairro" value="{{ contrato['billing_bairro'] }}" required readonly><br>
-
-            <label for="billing_municipio">MUNICIPIO:</label>
-            <input type="text" id="billing_municipio" name="billing_municipio" value="{{ contrato['billing_municipio'] }}" required readonly><br>
-
-            <label for="billing_uf">UF:</label>
-            <input type="text" id="billing_uf" name="billing_uf" value="{{ contrato['billing_uf'] }}" required readonly><br>
-
-            <label for="billing_cep">CEP:</label>
-            <input type="text" id="billing_cep" name="billing_cep" value="{{ contrato['billing_cep'] }}" required readonly><br>
-
-            <label for="delivery_address">ENDEREÇO DE ENTREGA:</label>
-            <input type="text" id="delivery_address" name="delivery_address" value="{{ contrato['delivery_address'] }}" readonly><br>
-
-            <label for="address_obs">DET. ENTREGA:</label><br>
-            <textarea name="address_obs" id="address_obs" maxlength="200" rows="4" cols="50" placeholder="Det. Entrega...">
-                {{ contrato['contrato']['address_obs'] }}
-            </textarea><br>
-
-            <label for="observations">OBSERVACOES:</label><br>
-            <textarea name="observations" id="observations" maxlength="200" rows="4" cols="50" placeholder="Observacoes..." readonly>
-                {{ contrato['contrato']['observations'] }}
-            </textarea><br>
-
-            <label for="oenf_obs">OBSERVACOES DA OENF:</label><br>
-            <textarea name="oenf_obs" id="oenf_obs" maxlength="200" rows="4" cols="50" placeholder="Observacoes da OENF..." readonly>
-                {{ contrato['contrato']['oenf_obs'] }}
-            </textarea><br>
-
-            <label for="contract_comments">COMENTÁRIOS:</label><br>
-            <textarea name="contract_comments" id="contract_comments" maxlength="200" rows="4" cols="50" placeholder="Comentários...">
-                {{ contrato['contrato']['contract_comments'] }}
-            </textarea><br>
-
+                <div>
+                    <label for="address_obs">DET. ENTREGA:</label><br>
+                    <textarea name="address_obs" id="address_obs" maxlength="200" rows="4" cols="50" placeholder="Det. Entrega...">
+                        {{ contrato['contrato']['address_obs'] }}
+                    </textarea><br>
+                </div>
+                <div>
+                    <label for="observations">OBSERVACOES:</label><br>
+                    <textarea name="observations" id="observations" maxlength="200" rows="4" cols="50" placeholder="Observacoes..." readonly>
+                        {{ contrato['contrato']['observations'] }}
+                    </textarea><br>
+                </div>
+                <div>
+                    <label for="oenf_obs">OBSERVACOES DA OENF:</label><br>
+                    <textarea name="oenf_obs" id="oenf_obs" maxlength="200" rows="4" cols="50" placeholder="Observacoes da OENF..." readonly>
+                        {{ contrato['contrato']['oenf_obs'] }}
+                    </textarea><br>
+                </div>
+                <div>
+                    <label for="contract_comments">COMENTÁRIOS:</label><br>
+                    <textarea name="contract_comments" id="contract_comments" maxlength="200" rows="4" cols="50" placeholder="Comentários...">
+                        {{ contrato['contrato']['contract_comments'] }}
+                    </textarea><br>
+                </div>
+            </div>
         {% endfor %}
 
-        <canvas id="dividing_line" width="1400" height="0.5" style="border:1px solid grey"></canvas><br>
-
-        <h3>Equipamentos</h3>
-        <table border="1">
-            <thead>
-                <tr>
-                    <th>Codigo</th>
-                    <th>Descricao</th>
-                    <th>Quantidade</th>
-                    <th>Preco Unitario</th>
-                    <th>R$</th>
-                    <th>Hr Extra</th>
-                    <th>Hrs Franquia</th>
-                </tr>
-            </thead>
-            <tbody id="contract_product_table_body">
-                {% for contrato in contract %}
-                    {% for item in contrato['produtos'] %}
+        <!-- Equipamentos -->
+        <div class="form-section">
+            <h3>Equipamentos</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
                         <tr>
-                            <td>{{ item['product_code'] }}</td>
-                            <td>{{ item['description'] }}</td>
-                            <td>{{ item['quantity'] }}</td>
-                            <td>{{ item['unit_price'] }}</td>
-                            <td>{{ item['price'] }}</td>
-                            <td>{{ item['extra_hours'] }}</td>
-                            <td>{{ item['rental_hours'] }}</td>
+                            <th>Codigo</th>
+                            <th>Descricao</th>
+                            <th>Quantidade</th>
+                            <th>Preco Unitario</th>
+                            <th>R$</th>
+                            <th>Hr Extra</th>
+                            <th>Hrs Franquia</th>
                         </tr>
-                    {% endfor %}
-                {% endfor %}
-            </tbody>
-        </table>
+                    </thead>
+                    <tbody id="contract_product_table_body">
+                        {% for contrato in contract %}
+                            {% for item in contrato['produtos'] %}
+                                <tr>
+                                    <td>{{ item['product_code'] }}</td>
+                                    <td>{{ item['description'] }}</td>
+                                    <td>{{ item['quantity'] }}</td>
+                                    <td>{{ item['unit_price'] }}</td>
+                                    <td>{{ item['price'] }}</td>
+                                    <td>{{ item['extra_hours'] }}</td>
+                                    <td>{{ item['rental_hours'] }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
-        <h4>Ressarcimentos</h4>
-        <table border="1">
-            <thead>
-                <tr>
-                    <th>Codigo</th>
-                    <th>Descricao</th>
-                    <th>Quantidade</th>
-                    <th>Preco Unitario</th>
-                    <th>R$</th>
-                </tr>
-            </thead>
-            <tbody id="contract_service_table_body">
-                {% for contrato in contract %}
-                    {% for service in contrato['servicos'] %}
+        <!-- Ressarcimentos -->
+        <div class="form-section">
+            <h3>Ressarcimentos</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
                         <tr>
-                            <td>{{ service['cod'] }}</td>
-                            <td>{{ service['descript'] }}</td>
-                            <td>{{ service['service_quantity'] }}</td>
-                            <td>{{ service['service_unit_price'] }}</td>
-                            <td>{{ service['service_price'] }}</td>
+                            <th>Codigo</th>
+                            <th>Descricao</th>
+                            <th>Quantidade</th>
+                            <th>Preco Unitario</th>
+                            <th>R$</th>
                         </tr>
-                    {% endfor %}
-                {% endfor %}
-            </tbody>
-        </table><br>
+                    </thead>
+                    <tbody id="contract_service_table_body">
+                        {% for contrato in contract %}
+                            {% for service in contrato['servicos'] %}
+                                <tr>
+                                    <td>{{ service['cod'] }}</td>
+                                    <td>{{ service['descript'] }}</td>
+                                    <td>{{ service['service_quantity'] }}</td>
+                                    <td>{{ service['service_unit_price'] }}</td>
+                                    <td>{{ service['service_price'] }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Valor Total -->
         {% for contrato in contract %}
-            <label for="value">VALOR TOTAL:</label>
-            <input type="text" id="value" name="value" value="{{ contrato['contrato']['value'] }}" readonly><br><br>
+            <div class="form-section">
+                <h3>Valor</h3>
+                <div class="form-grid">
+                    <div>
+                        <label for="value">VALOR TOTAL:</label>
+                        <input type="text" id="value" name="value" value="{{ contrato['contrato']['value'] }}" readonly><br><br>
+                    </div>
+                </div>
+            </div>
         {% endfor %}
-        <input type="submit" value="Salvar Alterações"><br><br>
+
+        <input type="submit" value="Salvar Alterações">
+        <a href="/lista_contratos">↩ Voltar</a>
+
         <script src="{{ url_for('static', filename='editar_contrato.js') }}"></script>
     </form>
-    <a href="/lista_contratos">↩</a>
 </body>
 </html>

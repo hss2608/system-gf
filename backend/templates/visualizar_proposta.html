@@ -4,91 +4,115 @@
     <meta charset="UTF-8">
     <title>Visualizar Proposta</title>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='proposta.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='visualizar_proposta.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
-    <h2>Informações da Proposta</h2>
-    {% for proposta in propostas %}
-        <div class="proposta-visualizacao" data-proposal-id="{{ proposta['proposta'].proposal_id }}">
+    <div class="container">
+        <h2>Informações da Proposta</h2>
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <script>
+                    {% for message in messages %}
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'Aviso',
+                            text: "{{ message }}",
+                            confirmButtonText: 'OK'
+                        });
+                    {% endfor %}
+                </script>
+            {% endif %}
+        {% endwith %}
+        {% for proposta in propostas %}
+            <div class="proposta-visualizacao" data-proposal-id="{{ proposta['proposta'].proposal_id }}">
 
-            <p><strong>Atendimento:</strong> {{ proposta['proposta'].proposal_id }}</p>
-            <p><strong>Cod Cliente:</strong> {{ proposta['proposta'].client_id }}</p>
-            <p><strong>Numero da Loja:</strong> {{ proposta['number_store'] }}</p>
-            <p><strong>Nome da empresa:</strong> {{ proposta['company'] }}</p>
-            <p><strong>CPF/CNPJ:</strong> {{ proposta['cpf_cnpj'] }}</p>
-            <p><strong>Contato:</strong> {{ proposta['contact_name'] }}</p>
-            <p><strong>Telefone:</strong> {{ proposta['phone'] }}</p>
-            <p><strong>Email:</strong> {{ proposta['email'] }}</p>
-            <p><strong>Status:</strong> {{ proposta['proposta'].status }}</p>
-            <p><strong>Endereco de Entrega:</strong> {{ proposta['proposta'].delivery_address }}</p>
-            <p><strong>Data de Entrega:</strong> {{ proposta['proposta'].delivery_date }}</p>
-            <p><strong>Data de Retirada:</strong> {{ proposta['proposta'].withdrawal_date }}</p>
-            <p><strong>Data de Inicio:</strong> {{ proposta['proposta'].start_date }}</p>
-            <p><strong>Data Final:</strong> {{ proposta['proposta'].end_date }}</p>
-            <p><strong>Dias Locacao:</strong> {{ proposta['proposta'].period_days }}</p>
-            <p><strong>Condição de Pagamento:</strong> {{ proposta['payment_condition'] }}</p>
-        </div>
-    {% endfor %}
+                <p><strong>Atendimento:</strong> {{ proposta['proposta'].proposal_id }}</p>
+                <p><strong>Cod Cliente:</strong> {{ proposta['proposta'].client_id }}</p>
+                <p><strong>Numero da Loja:</strong> {{ proposta['number_store'] }}</p>
+                <p><strong>Nome da empresa:</strong> {{ proposta['company'] }}</p>
+                <p><strong>CPF/CNPJ:</strong> {{ proposta['cpf_cnpj'] }}</p>
+                <p><strong>Contato:</strong> {{ proposta['contact_name'] }}</p>
+                <p><strong>Telefone:</strong> {{ proposta['phone'] }}</p>
+                <p><strong>Email:</strong> {{ proposta['email'] }}</p>
+                <p><strong>Status:</strong> {{ proposta['proposta'].status }}</p>
+                <p><strong>Endereco de Entrega:</strong> {{ proposta['proposta'].delivery_address }}</p>
+                <p><strong>Bairro Entrega:</strong> {{ proposta['proposta'].delivery_bairro }}</p>
+                <p><strong>Municipio Entrega:</strong> {{ proposta['proposta'].delivery_municipio }}</p>
+                <p><strong>UF Entrega:</strong> {{ proposta['proposta'].delivery_uf }}</p>
+                <p><strong>CEP Entrega:</strong> {{ proposta['proposta'].delivery_cep }}</p>
+                <p><strong>Data de Entrega:</strong> {{ proposta['proposta'].delivery_date }}</p>
+                <p><strong>Data de Retirada:</strong> {{ proposta['proposta'].withdrawal_date }}</p>
+                <p><strong>Data de Inicio:</strong> {{ proposta['proposta'].start_date }}</p>
+                <p><strong>Data Final:</strong> {{ proposta['proposta'].end_date }}</p>
+                <p><strong>Dias Locacao:</strong> {{ proposta['proposta'].period_days }}</p>
+                <p><strong>Condição de Pagamento:</strong> {{ proposta['payment_condition'] }}</p>
+            </div>
+        {% endfor %}
 
-    <h3>Equipamentos</h3>
-    <table>
-        <thead>
-            <tr>
-                <th>Codigo</th>
-                <th>Descricao</th>
-                <th>Quantidade</th>
-                <th>Preco Unitario</th>
-                <th>R$</th>
-                <th>Hr Extra</th>
-                <th>Hrs Franquia</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for proposta in propostas %}
-                {% for item in proposta['products'] %}
-                    <tr>
-                        <td>{{ item['product_code'] }}</td>
-                        <td>{{ item['description'] }}</td>
-                        <td>{{ item['quantity'] }}</td>
-                        <td>{{ item['unit_price'] }}</td>
-                        <td>{{ item['price'] }}</td>
-                        <td>{{ item['extra_hours'] }}</td>
-                        <td>{{ item['rental_hours'] }}</td>
-                    </tr>
+        <h3>Equipamentos</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Codigo</th>
+                    <th>Descricao</th>
+                    <th>Quantidade</th>
+                    <th>Preco Unitario</th>
+                    <th>R$</th>
+                    <th>Hr Extra</th>
+                    <th>Hrs Franquia</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for proposta in propostas %}
+                    {% for item in proposta['products'] %}
+                        <tr>
+                            <td>{{ item['product_code'] }}</td>
+                            <td>{{ item['description'] }}</td>
+                            <td>{{ item['quantity'] }}</td>
+                            <td>{{ item['unit_price'] }}</td>
+                            <td>{{ item['price'] }}</td>
+                            <td>{{ item['extra_hours'] }}</td>
+                            <td>{{ item['rental_hours'] }}</td>
+                        </tr>
+                    {% endfor %}
                 {% endfor %}
-            {% endfor %}
-        </tbody>
-    </table>
+            </tbody>
+        </table>
 
-    <h4>Ressarcimentos</h4>
-    <table>
-        <thead>
-            <tr>
-                <th>Codigo</th>
-                <th>Descricao</th>
-                <th>Quantidade</th>
-                <th>Preco Unitario</th>
-                <th>R$</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for proposta in propostas %}
-                {% for service in proposta['services'] %}
-                    <tr>
-                        <td>{{ service['cod'] }}</td>
-                        <td>{{ service['descript'] }}</td>
-                        <td>{{ service['service_quantity'] }}</td>
-                        <td>{{ service['service_unit_price'] }}</td>
-                        <td>{{ service['service_price'] }}</td>
-                    </tr>
+        <h4>Ressarcimentos</h4>
+        <table>
+            <thead>
+                <tr>
+                    <th>Codigo</th>
+                    <th>Descricao</th>
+                    <th>Quantidade</th>
+                    <th>Preco Unitario</th>
+                    <th>R$</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for proposta in propostas %}
+                    {% for service in proposta['services'] %}
+                        <tr>
+                            <td>{{ service['cod'] }}</td>
+                            <td>{{ service['descript'] }}</td>
+                            <td>{{ service['service_quantity'] }}</td>
+                            <td>{{ service['service_unit_price'] }}</td>
+                            <td>{{ service['service_price'] }}</td>
+                        </tr>
+                    {% endfor %}
                 {% endfor %}
-            {% endfor %}
-        </tbody>
-    </table>
-    {% for proposta in propostas %}
-        <p><strong>Total:</strong> {{ proposta['proposta'].value }}</p>
-    {% endfor %}
-    <script src="{{ url_for('static', filename='visualizar_proposta.js') }}"></script>
-    <a href="/lista_propostas">↩</a>
+            </tbody>
+        </table>
+        {% for proposta in propostas %}
+            <p><strong>Total:</strong> {{ proposta['proposta'].value }}</p>
+        {% endfor %}
+
+        <script src="{{ url_for('static', filename='visualizar_proposta.js') }}"></script>
+        <a href="/lista_propostas" class="btn-back">↩ Voltar</a>
+    </div>
 </body>
 </html>

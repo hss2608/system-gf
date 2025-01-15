@@ -83,7 +83,7 @@ function updateTable(productData) {
         newRow.append('<td class="extra_hours_placeholder"><input type="text" name="extra_hours" class="extra_hours_input"></td>');
         newRow.append('<td class="rental_hours_placeholder"><input type="text" name="rental_hours" class="rental_hours_input"></td>');
         // adicionando botão excluir
-        var deleteButton = $('<button onclick="removeProduct(this.parentNode.parentNode)">Excluir</button>');
+        var deleteButton = $('<button class="codigos_excluir" onclick="removeProduct(this.parentNode.parentNode)">Excluir</button>');
         newRow.append($('<td>').append(deleteButton));
 
         tableBody.append(newRow);
@@ -192,7 +192,7 @@ function updateTableService(serviceData) {
         newRow.append('<td class="service_unit_price_placeholder"><input type="text" name="service_unit_price[]" class="service_unit_price_input" onchange="updateServicePrice(this)"></td>');
         newRow.append('<td class="service_price_placeholder"></td>');
         // adicionando botao excluir
-        var deleteButton = $('<button onclick="removeService(this.parentNode.parentNode)">Excluir</button>');
+        var deleteButton = $('<button class="codigos_excluir" onclick="removeService(this.parentNode.parentNode)">Excluir</button>');
         newRow.append($('<td>').append(deleteButton));
 
         tableBody.append(newRow);
@@ -280,7 +280,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function submitProposal() {
     var proposalData = {
-        proposal_id: $('#proposal_id').val(),
+        proposal_id: $('#proposal_id').val().split('/')[0].substring(0, 5),
         client_id: $('#client_id').val(),
         company: $('#company').val(),
         cpf_cnpj: $('#cpf_cnpj').val(),
@@ -295,6 +295,10 @@ function submitProposal() {
         end_date: $('#end_date').val(),
         period_days: $('#period_days').val(),
         delivery_address: $('#delivery_address').val(),
+        delivery_bairro: $('#delivery_bairro').val(),
+        delivery_municipio: $('#delivery_municipio').val(),
+        delivery_uf: $('#delivery_uf').val(),
+        delivery_cep: $('#delivery_cep').val(),
         observations: $('#observations').val(),
         oenf_obs: $('#oenf_obs').val(),
         value: $('#value').val(),
@@ -313,16 +317,17 @@ function submitProposal() {
         success: function(response) {
             console.log('Proposta enviada com sucesso:', response);
             if (response.success) {
-                if (response.redirect_url) {
-                    window.location.href = response.redirect_url;
-                } else {
+                if (response.tarefas && response.tarefas.length > 0) {
                     alert('Proposta aprovada e atualizada com sucesso!');
+                    response.tarefas.forEach(function(tarefa) {
+                        console.log('Tarefa:',  tarefa.message);
+                    });
                 }
             } else {
                 alert('Erro ao atualizar a proposta: ' + response.message);
             }
         },
-        error: function(error) {
+        error: function(xhr, status, error) {
             console.error('Erro ao enviar proposta:', error);
             alert('Erro ao enviar a proposta.');
         }

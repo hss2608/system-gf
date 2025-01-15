@@ -2,33 +2,117 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Visualizar Cliente</title>
-    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='visualizar_cliente.css') }}">
 </head>
 <body>
-    <h2>Informações do Cliente</h2>
-    <p><strong>Nome da empresa:</strong> {{ cliente.company }}</p>
-    <p><strong>Razão Social:</strong> {{ cliente.corporate_name }}</p>
-    <p><strong>Numero da Loja:</strong> {{ cliente.number_store }}</p>
-    <p><strong>Tipo de Pessoa:</strong> {{cliente.person_type}}</p>
-    <p><strong>Tipo de Cliente:</strong> {{ cliente.client_type }}</p>
-    <p><strong>CPF/CNPJ:</strong> {{ cliente.cpf_cnpj }}</p>
-    <p><strong>Inscricao Estadual:</strong> {{cliente.state_registration}}</p>
-    <p><strong>Endereço Empresa:</strong> {{cliente.company_address}}</p>
-    <p><strong>Municipio:</strong> {{cliente.municipio}}</p>
-    <p><strong>UF:</strong> {{cliente.uf}}</p>
-    <p><strong>CEP:</strong> {{cliente.cep}}</p>
-    <p><strong>Bairro:</strong> {{cliente.bairro}}</p>
-    <p><strong>Data de registro:</strong> {{ cliente.registration_date }}</p>
-    <p><strong>Contato:</strong> {{ cliente.contact_name }}</p>
-    <p><strong>Telefone:</strong> {{ cliente.phone }}</p>
-    <p><strong>Email:</strong> {{ cliente.email }}</p>
-    <p><strong>Endereço de cobranca:</strong> {{cliente.billing_address}}</p>
-    <p><strong>Bairro:</strong> {{cliente.billing_bairro}}</p>
-    <p><strong>Municipio:</strong> {{cliente.billing_municipio}}</p>
-    <p><strong>UF:</strong> {{cliente.billing_uf}}</p>
-    <p><strong>CEP:</strong> {{cliente.billing_cep}}</p>
-
-    <a href="/lista_clientes">↩</a>
+    <div class="container">
+        <h2>Informações do Cliente</h2>
+        <table>
+            <tr>
+                <th>Campo</th>
+                <th>Valor</th>
+            </tr>
+            <tr>
+                <td>Nome da empresa</td>
+                <td>{{ cliente.company }}</td>
+            </tr>
+            <tr>
+                <td>Razão Social</td>
+                <td>{{ cliente.corporate_name }}</td>
+            </tr>
+            <tr>
+                <td>Numero da Loja</td>
+                <td>{{ cliente.number_store }}</td>
+            </tr>
+            <tr>
+                <td>Tipo de Pessoa</td>
+                <td>{{ cliente.person_type }}</td>
+            </tr>
+            <tr>
+                <td>Tipo de Cliente</td>
+                <td>{{ cliente.client_type }}</td>
+            </tr>
+            <tr>
+                <td>CPF/CNPJ</td>
+                <td>{{ cliente.cpf_cnpj }}</td>
+            </tr>
+            <tr>
+                <td>Inscrição Estadual</td>
+                <td>{{ cliente.state_registration }}</td>
+            </tr>
+            <tr>
+                <td>Endereço Empresa</td>
+                <td>{{ cliente.company_address }}</td>
+            </tr>
+            <tr>
+                <td>Município</td>
+                <td>{{ cliente.municipio }}</td>
+            </tr>
+            <tr>
+                <td>UF</td>
+                <td>{{ cliente.uf }}</td>
+            </tr>
+            <tr>
+                <td>CEP</td>
+                <td>{{ cliente.cep }}</td>
+            </tr>
+            <tr>
+                <td>Bairro</td>
+                <td>{{ cliente.bairro }}</td>
+            </tr>
+            <tr>
+                <td>Data de registro</td>
+                <td class="date-format">{{ cliente.registration_date }}</td>
+            </tr>
+            <tr>
+                <td>Contato</td>
+                <td>{{ cliente.contact_name }}</td>
+            </tr>
+            <tr>
+                <td>Telefone</td>
+                <td>{{ cliente.phone }}</td>
+            </tr>
+            <tr>
+                <td>Email</td>
+                <td>{{ cliente.email }}</td>
+            </tr>
+            <tr>
+                <td>Endereço de cobrança</td>
+                <td>{{ cliente.billing_address }}</td>
+            </tr>
+            <tr>
+                <td>Bairro (Cobrança)</td>
+                <td>{{ cliente.billing_bairro }}</td>
+            </tr>
+            <tr>
+                <td>Município (Cobrança)</td>
+                <td>{{ cliente.billing_municipio }}</td>
+            </tr>
+            <tr>
+                <td>UF (Cobrança)</td>
+                <td>{{ cliente.billing_uf }}</td>
+            </tr>
+            <tr>
+                <td>CEP (Cobrança)</td>
+                <td>{{ cliente.billing_cep }}</td>
+            </tr>
+        </table>
+        <a href="/lista_clientes" class="btn-back">↩ Voltar</a>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const dateCells = document.querySelectorAll('.date-format');
+            dateCells.forEach(cell => {
+                const originalDate = cell.textContent.trim();
+                const [year, month, day] = originalDate.split('-');
+                if (year && month && day) {
+                    cell.textContent = `${day}/${month}/${year}`;
+                }
+            });
+        });
+    </script>
 </body>
 </html>

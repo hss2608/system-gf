@@ -80,13 +80,17 @@ def criar_contrato(proposal_id):
 
         auto_data = {
             'date_issue': datetime.now().strftime("%d/%m/%Y"),
-            'contract_id': contract_number(),
-            'proposal_id': proposta_dict['proposta']['proposal_id'],
+            'contract_id': contract_number().split('/')[0],
+            'proposal_id': proposta_dict['proposta']['proposal_id'].split('/')[0],
             'start_contract': proposta_dict['proposta']['start_date'],
             'end_contract': proposta_dict['proposta']['end_date'],
             'contract_days': proposta_dict['proposta']['period_days'],
             'value': proposta_dict['proposta']['value'],
             'delivery_address': proposta_dict['proposta']['delivery_address'],
+            'delivery_bairro': proposta_dict['proposta']['delivery_bairro'],
+            'delivery_municipio': proposta_dict['proposta']['delivery_municipio'],
+            'delivery_uf': proposta_dict['proposta']['delivery_uf'],
+            'delivery_cep': proposta_dict['proposta']['delivery_cep'],
             'client_id': proposta_dict['proposta']['client_id'],
             'contact_name': proposta_dict['contact_name'],
             'phone': proposta_dict['phone'],
@@ -125,6 +129,21 @@ def criar_contrato(proposal_id):
                 'service_price': service['service_price']
             } for service in proposta_dict['services']]
         }
+
+        contract = Contract(
+            date_issue=auto_data['date_issue'],
+            contract_id=auto_data['contract_id'],
+            proposal_id=auto_data['proposal_id'],
+            start_contract=auto_data['start_contract'],
+            end_contract=auto_data['end_contract'],
+            contract_days=auto_data['contract_days'],
+            value=auto_data['value'],
+            observations=auto_data['observations'],
+            oenf_obs=auto_data['oenf_obs'],
+        )
+
+        session.add(contract)
+        session.commit()
 
         return auto_data
 
@@ -280,11 +299,14 @@ def buscar_contrato_por_id(contract_id, proposal_id):
                 'oenf_obs': contrato.oenf_obs, 'contract_comments': contrato.contract_comments, 'value': contrato.value
             },
             'client_id': proposta.client_id, 'delivery_address': proposta.delivery_address,
+            'delivery_bairro': proposta.delivery_bairro, 'delivery_municipio': proposta.delivery_municipio,
+            'delivery_uf': proposta.delivery_uf, 'delivery_cep': proposta.delivery_cep,
             'delivery_date': proposta_delivery_date,
             'withdrawal_date': proposta_withdrawal_date, 'company': cliente.company,
             'number_store': cliente.number_store, 'company_address': cliente.company_address,
             'municipio': cliente.municipio, 'uf': cliente.uf, 'cep': cliente.cep, 'bairro': cliente.bairro,
-            'contact_name': cliente.contact_name, 'phone': cliente.phone, 'cpf_cnpj': cliente.cpf_cnpj,
+            'contact_name': cliente.contact_name, 'phone': cliente.phone, 'email': cliente.email,
+            'cpf_cnpj': cliente.cpf_cnpj,
             'state_registration': cliente.state_registration, 'billing_address': cliente.billing_address,
             'billing_bairro': cliente.billing_bairro, 'billing_municipio': cliente.billing_municipio,
             'billing_uf': cliente.billing_uf, 'billing_cep': cliente.billing_cep,
@@ -331,6 +353,7 @@ def atualizar_contrato(contract_id, dados_atualizados):
     try:
         contrato = session.query(Contract).filter_by(contract_id=contract_id).first()
         contrato.contract_status = dados_atualizados.get('contract_status', contrato.contract_status)
+        contrato.contract_type = dados_atualizados.get('contract_type', contrato.contract_type)
         contrato.address_obs = dados_atualizados.get('address_obs', contrato.address_obs)
         contrato.contract_comments = dados_atualizados.get('contract_comments', contrato.contract_comments)
 
@@ -348,6 +371,7 @@ def contract_to_dict(contrato):
     session = create_session()
     try:
         contract_dict = {
+            'contract_type': contrato.contract_type,
             'contract_status': contrato.contract_status,
             'address_obs': contrato.address_obs,
             'contract_comments': contrato.contract_comments

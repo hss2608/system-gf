@@ -24,8 +24,6 @@ def gerar_pdf(proposal_data):
         fontName='Helvetica-Bold',
         fontSize=10,
         textColor=colors.black,
-
-
     )
 
     caminho_logotipo = "C:\\Users\\Henrique.santos\\PycharmProjects\\sistemaGF\\backend\\logo_geraforca.png"
@@ -103,7 +101,7 @@ def gerar_pdf(proposal_data):
 
     rental_hours = proposal_dict['products'][0]['rental_hours'] if proposal_dict['products'] else 'N/A'
 
-    terceiro_texto = f"""
+    terceiro_texto = f"""   
         II) PREÇO DE LOCAÇÃO PARA O PERÍODO DE {proposal_dict['proposta']['start_date']} À {proposal_dict['proposta']['end_date']} (PERÍODO DE {rental_hours} HORAS):
     """
     elementos.append(Paragraph(terceiro_texto, normal_style))
@@ -185,6 +183,7 @@ def gerar_pdf(proposal_data):
         ('INNERGRID', (0, 0), (-1, -1), 0.5, colors.black),
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('VALIGN', (0, 0), (0, 0), 'TOP'),
     ]))
 
     # Adiciona a tabela do quadro ao PDF

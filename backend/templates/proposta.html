@@ -5,149 +5,233 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Proposta Comercial</title>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='tabelas.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='proposta.css') }}">
 </head>
 <body>
-    <h1>Proposta Comercial</h1>
-
+    <h2>Proposta Comercial</h2>
     <form method="POST" action="{{ url_for('proposta') }}" id="proposal-form">
-        <label for="proposal_id">PROPOSTA N°</label>
-        <input type="text" name="proposal_id" id="proposal_id" readonly onblur="submitProposalId()"><br>
 
-        <input type="hidden" name="client_id" id="client_id" value="{% if client_data and 'client_id' in client_data %}{{ client_data['client_id'] }}{% endif %}">
+        <!-- Informações da Proposta  -->
+        <div class="form-section">
+            <h3>Informações da Proposta</h3>
+            <div class="form-grid">
+                <div>
+                    <label for="proposal_id">PROPOSTA N°</label>
+                    <input type="text" name="proposal_id" id="proposal_id" readonly onblur="submitProposalId()">
+                </div><br>
+                <div>
+                    <label for="status">STATUS:</label>
+                    <select name="status" id="status">
+                        <option value="Enviada">Enviada</option>
+                        <option value="Aprovada">Aprovada</option>
+                        <option value="Reprovada">Reprovada</option>
+                    </select>
+                </div>
+            </div>
+        </div>
 
-        <label for="cpf_cnpj" title="CPF/CNPJ">CPF/CNPJ:</label>
-        <input type="text" name="cpf_cnpj" id="cpf_cnpj" required onblur="populateClientData()" autocomplete="tax-id" placeholder="CPF/CNPJ">
+        <!-- Informações do Cliente -->
+        <div class="form-section">
+            <h3>Informações do Cliente</h3>
+            <div class="form-grid">
+                <input type="hidden" name="client_id" id="client_id" value="{% if client_data and 'client_id' in client_data %}{{ client_data['client_id'] }}{% endif %}">
+                <div>
+                    <label for="cpf_cnpj" title="CPF/CNPJ">CPF/CNPJ:</label>
+                    <input type="text" name="cpf_cnpj" id="cpf_cnpj" required onblur="populateClientData()" autocomplete="tax-id" placeholder="CPF/CNPJ">
+                </div><br>
+                <input type="hidden" id="client_data" name="client_data" class="client_data" data-client='{{ client_data | tojson }}'>
+                <div class="long-input">
+                    <label for="company" title="EMPRESA">EMPRESA:</label>
+                    <input type="text" name="company" id="company" autocomplete="organization" readonly>
+                </div><br>
+                <div class="long-input">
+                    <label for="contact_name" title="CONTATO">CONTATO:</label>
+                    <input type="text" name="contact_name" id="contact_name" autocomplete="name" readonly>
+                </div><br>
+                <div>
+                    <label for="phone" title="TELEFONE">TELEFONE:</label>
+                    <input type="text" name="phone" id="phone" autocomplete="tel" readonly>
+                </div><br>
+                <div>
+                    <label for="email" title="EMAIL">EMAIL:</label>
+                    <input type="text" name="email" id="email" autocomplete="email" readonly>
+                </div>
+                <div>
+                    <label for="number_store" title="LOJA">LOJA:</label>
+                    <input type="text" name="number_store" id="number_store" autocomplete="off" readonly>
+                </div>
+            </div>
+        </div>
 
-        <input type="hidden" id="client_data" name="client_data" class="client_data" data-client='{{ client_data | tojson }}'><br>
+        <!-- Informações da Entrega -->
+        <div class="form-section">
+            <h3>Informações da Entrega</h3>
+            <div class="form-grid">
+                <div class="long-input">
+                    <label for="delivery_address" title="END DE ENTREGA">ENDEREÇO DE ENTREGA</label>
+                    <input type="text" name="delivery_address" id="delivery_address" placeholder="Rua/Av, N°">
+                </div><br>
+                <div class="long-input">
+                    <label for="delivery_bairro" title="BAIRRO ENTREGA">BAIRRO</label>
+                    <input type="text" name="delivery_bairro" id="delivery_bairro">
+                </div><br>
+                <div class="long-input">
+                    <label for="delivery_municipio" title="MUNICIPIO ENTREGA">MUNICIPIO</label>
+                    <input type="text" name="delivery_municipio" id="delivery_municipio">
+                </div><br>
+                <div>
+                    <label for="delivery_uf" title="UF ENTREGA">UF</label>
+                    <input type="text" name="delivery_uf" id="delivery_uf">
+                </div><br>
+                <div>
+                    <label for="delivery_cep" title="CEP ENTREGA">CEP</label>
+                    <input type="text" name="delivery_cep" id="delivery_cep">
+                </div>
+                <div>
+                    <label for="delivery_date">DATA DE ENTREGA:</label>
+                    <input type="text" name="delivery_date" id="delivery_date" pattern="\d{2}/\d{2}/\d{4}" placeholder="__/__/____">
+                </div><br>
+                <div>
+                    <label for="withdrawal_date">DATA DE RETIRADA:</label>
+                    <input type="text" name="withdrawal_date" id="withdrawal_date" pattern="\d{2}/\d{2}/\d{4}" placeholder="__/__/____">
+                </div>
+            </div>
+        </div>
 
-        <label for="company" title="EMPRESA">EMPRESA:</label>
-        <input type="text" name="company" id="company" autocomplete="organization" readonly><br>
+        <!-- Outras informações -->
+        <div class="form-section">
+            <h3>Outras Informações da Proposta</h3>
+            <div class="form-grid">
+                <div>
+                    <label for="start_date">DATA DE INICIO:</label>
+                    <input type="text" name="start_date" id="start_date" pattern="\d{2}/\d{2}/\d{4}" onblur="updatePeriodDays()" placeholder="__/__/____">
+                </div><br>
+                <div>
+                    <label for="end_date">DATA FINAL:</label>
+                    <input type="text" name="end_date" id="end_date" pattern="\d{2}/\d{2}/\d{4}" onblur="updatePeriodDays()" placeholder="__/__/____">
+                </div><br>
+                <div>
+                    <label for="period_days">PERIODO:</label>
+                    <input type="text" name="period_days" id="period_days" readonly>
+                </div><br>
+                <div class="long-input">
+                    <label for="payment_condition">CONDIÇÃO DE PAGAMENTO</label>
+                    <select name="payment_condition" id="payment_condition">
+                    {% for condition in payment_condition %}
+                        <option value="">Condições...</option>
+                    {% endfor %}
+                    </select>
+                </div><br>
+                <div>
+                    <label for="validity" title="VALIDADE">VALIDADE DA PROPOSTA:</label>
+                    <input type="text" name="validity" id="validity">
+                </div>
+            </div><br>
+            <div>
+                <label for="observations">OBSERVAÇÕES:</label>
+                <textarea name="observations" id="observations" maxlength="200" rows="4" cols="50" placeholder="Observações..."></textarea>
+            </div><br>
+            <div>
+                <label for="oenf_obs">OBSERVAÇÕES DA OENF:</label>
+                <textarea name="oenf_obs" id="oenf_obs" maxlength="200" rows="4" cols="50" placeholder="Observações da OENF..."></textarea>
+            </div>
+        </div>
+        <!--canvas id="dividing_line" width="1400" height="0.5" style="border:1px solid grey"></canvas -->
 
-        <label for="contact_name" title="CONTATO">CONTATO:</label>
-        <input type="text" name="contact_name" id="contact_name" autocomplete="name" readonly><br>
+        <!-- Equipamentos -->
+        <div class="form-section">
+            <h3>Equipamentos</h3>
+            <div class="form-grid">
+                <div>
+                    <label for="product_code" title="product_code">CODIGO:</label>
+                    <input type="text" name="product_code[]" id="product_code" class="product_code" placeholder="EQUIPAMENTOS">
+                </div>
+                <button class="codigos" type="button" onclick="populateProductData()">OK</button>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>COD</th>
+                            <th class="wide-column">DESCRIÇÃO</th>
+                            <th>TIPO</th>
+                            <th class="wide-column">DESCRIÇÃO COMPLEMENTAR</th>
+                            <th>QTDE</th>
+                            <th class="wide-column">R$ UN</th>
+                            <th class="wide-column">R$</th>
+                            <th>VAL HR EXTRAS</th>
+                            <th>HRS FRANQUIA</th>
+                        </tr>
+                    </thead>
+                    <tbody id="product_table_body">
+                        <tr>
+                            <td class="product_id_placeholder">{{ product_data.product_id or '' }}</td>
+                            <td class="product_code_placeholder">{{ product_data.product_code or '' }}</td>
+                            <td class="description_placeholder">{{ product_data.description or '' }}</td>
+                            <td class="type_placeholder">{{ product_data.type or '' }}</td>
+                            <td class="add_description_placeholder">{{ product_data.add_description or '' }}</td>
+                            <td class="quantity_placeholder"></td>
+                            <td class="unit_price_placeholder"></td>
+                            <td class="price_placeholder"></td>
+                            <td class="extra_hours_placeholder"></td>
+                            <td class="rental_hours_placeholder"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
-        <label for="phone" title="TELEFONE">TELEFONE:</label>
-        <input type="text" name="phone" id="phone" autocomplete="tel" readonly><br>
+        <!-- Ressarcimentos -->
+        <div class="form-section">
+            <h3>Ressarcimentos</h3>
+            <div class="form-grid">
+                <div>
+                    <label for="cod" title="cod">CODIGO:</label>
+                    <input type="text" name="cod[]" id="cod" class="cod" placeholder="RESSARCIMENTO">
+                </div>
+                <button  class="codigos" type="button" onclick="populateServiceData()">OK</button>
+            </div>
+            <div class="table-container">
+                <table border="1">
+                    <thead>
+                        <tr>
+                            <th class="wide-column2">COD</th>
+                            <th class="wide-column">DESCRIÇÃO</th>
+                            <th class="wide-column2">QTDE</th>
+                            <th class="wide-column3">R$ UNIT</th>
+                            <th class="wide-column">R$</th>
+                        </tr>
+                    </thead>
+                    <tbody id="service_table_body">
+                        <tr>
+                            <td class="cod_placeholder">{{ service_data.cod or '' }}</td>
+                            <td class="descript_placeholder">{{ service_data.descript or '' }}</td>
+                            <td class="service_quantity_placeholder"></td>
+                            <td class="service_unit_price_placeholder"></td>
+                            <td class="service_price_placeholder"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
-        <label for="email" title="EMAIL">EMAIL:</label>
-        <input type="text" name="email" id="email" autocomplete="email" readonly><br>
+        <!-- Valor Final -->
+        <div class="form-section">
+            <h3>Valor</h3>
+            <div class="form-grid">
+                <div>
+                    <label for="value" title="value">R$</label>
+                    <input type="text" id="value" name="value" readonly>
+                </div>
+            </div>
+        </div>
 
-        <label for="number_store" title="LOJA">LOJA:</label>
-        <input type="text" name="number_store" id="number_store" autocomplete="off" readonly><br>
+        <button class="submit" type="submit">CONFIRMAR</button><br>
 
-        <label for="status">STATUS:</label>
-        <select name="status" id="status">
-            <option value="Enviada">Enviada</option>
-            <option value="Aprovada">Aprovada</option>
-            <option value="Reprovada">Reprovada</option>
-        </select><br>
-
-        <label for="delivery_address" title="END DE ENTREGA">ENDERECO DE ENTREGA</label>
-        <input type="text" name="delivery_address" id="delivery_address"><br>
-
-        <label for="delivery_date">DATA DE ENTREGA:</label>
-        <input type="text" name="delivery_date" id="delivery_date" pattern="\d{2}/\d{2}/\d{4}" placeholder="__/__/____"><br>
-
-        <label for="withdrawal_date">DATA DE RETIRADA:</label>
-        <input type="text" name="withdrawal_date" id="withdrawal_date" pattern="\d{2}/\d{2}/\d{4}" placeholder="__/__/____"><br>
-
-        <label for="start_date">DATA DE INICIO:</label>
-        <input type="text" name="start_date" id="start_date" pattern="\d{2}/\d{2}/\d{4}" onblur="updatePeriodDays()" placeholder="__/__/____"><br>
-
-        <label for="end_date">DATA FINAL:</label>
-        <input type="text" name="end_date" id="end_date" pattern="\d{2}/\d{2}/\d{4}" onblur="updatePeriodDays()" placeholder="__/__/____"><br>
-
-        <label for="period_days">PERIODO:</label>
-        <input type="text" name="period_days" id="period_days" readonly><br>
-
-        <label for="payment_condition">CONDIÇÃO DE PAGAMENTO</label>
-        <select name="payment_condition" id="payment_condition">
-        {% for condition in payment_condition %}
-            <option value="">Condições...</option>
-        {% endfor %}
-        </select><br>
-
-        <label for="validity" title="VALIDADE">VALIDADE DA PROPOSTA:</label>
-        <input type="text" name="validity" id="validity"><br>
-
-        <label for="observations">OBSERVACOES:</label><br>
-        <textarea name="observations" id="observations" maxlength="200" rows="4" cols="50" placeholder="Observacoes..."></textarea><br>
-
-        <label for="oenf_obs">OBSERVACOES DA OENF:</label><br>
-        <textarea name="oenf_obs" id="oenf_obs" maxlength="200" rows="4" cols="50" placeholder="Observacoes da OENF..."></textarea><br>
-
-        <canvas id="dividing_line" width="1400" height="0.5" style="border:1px solid grey"></canvas><br>
-
-        <label for="product_code" title="product_code">CODIGO:</label>
-        <input type="text" name="product_code[]" id="product_code" class="product_code" placeholder="EQUIPAMENTOS">
-        <button type="button" onclick="populateProductData()">ADICIONAR</button>
-
-        <table border="1">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>CODIGO</th>
-                    <th>DESCRICAO</th>
-                    <th>TIPO</th>
-                    <th>DESCRICAO COMPLEMENTAR</th>
-                    <th>QUANTIDADE</th>
-                    <th>R$ UNIT</th>
-                    <th>R$</th>
-                    <th>VAL HR EXTRAS</th>
-                    <th>HRS FRANQUIA</th>
-                </tr>
-            </thead>
-            <tbody id="product_table_body">
-                <tr>
-                    <td class="product_id_placeholder">{{ product_data.product_id or '' }}</td>
-                    <td class="product_code_placeholder">{{ product_data.product_code or '' }}</td>
-                    <td class="description_placeholder">{{ product_data.description or '' }}</td>
-                    <td class="type_placeholder">{{ product_data.type or '' }}</td>
-                    <td class="add_description_placeholder">{{ product_data.add_description or '' }}</td>
-                    <td class="quantity_placeholder"></td>
-                    <td class="unit_price_placeholder"></td>
-                    <td class="price_placeholder"></td>
-                    <td class="extra_hours_placeholder"></td>
-                    <td class="rental_hours_placeholder"></td>
-                </tr>
-            </tbody>
-        </table><br>
-
-        <label for="cod" title="cod">CODIGO:</label>
-        <input type="text" name="cod[]" id="cod" class="cod" placeholder="RESSARCIMENTO">
-        <button type="button" onclick="populateServiceData()">ADICIONAR</button>
-
-        <table border="1">
-            <thead>
-                <tr>
-                    <th>CODIGO</th>
-                    <th>DESCRICAO</th>
-                    <th>QUANTIDADE</th>
-                    <th>R$ UNIT</th>
-                    <th>R$</th>
-                </tr>
-            </thead>
-            <tbody id="service_table_body">
-                <tr>
-                    <td class="cod_placeholder">{{ service_data.cod or '' }}</td>
-                    <td class="descript_placeholder">{{ service_data.descript or '' }}</td>
-                    <td class="service_quantity_placeholder"></td>
-                    <td class="service_unit_price_placeholder"></td>
-                    <td class="service_price_placeholder"></td>
-                </tr>
-            </tbody>
-        </table><br>
-
-        <label for="value" title="value">R$</label>
-        <input type="text" id="value" name="value" readonly><br>
-
-        <button type="submit">CONFIRMAR</button><br><br>
-
-        <a href="/lista_propostas">↩</a>
+        <a href="/lista_propostas">↩ Voltar</a>
 
         <script src="{{ url_for('static', filename='proposta.js') }}"></script>
-
     </form>
 </body>
 </html>

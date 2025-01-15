@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, send_file
+from flask import Flask, render_template, request, jsonify, send_file, flash, redirect
 from backend.models.cadastro import Cadastro
 from backend.models.proposta import (buscar_clientes, buscar_produtos, buscar_servicos, proposta_comercial,
                                      proposal_number, add_products, add_services, buscar_cond_pagamentos)
@@ -8,15 +8,19 @@ from backend.models.contrato import (Contrato, criar_contrato, contract_number, 
 from backend.models.lista_clientes import listar_todos_clientes, buscar_cliente_por_id, atualizar_cliente
 from backend.models.lista_propostas import (listar_todas_propostas, buscar_proposta_por_id, atualizar_proposta,
                                             proposal_to_dict)
+from backend.models.pedido_venda import (criar_pedido, sales_order_number, buscar_pedido_por_id)
 from backend.models.pdf_proposta import gerar_pdf
 from backend.models.pdf_contrato import gerar_pdf_contrato
+from backend.models.pdf_pedido_venda import gerar_pdf_pedido_venda 
 import traceback
 import logging
 import json
+import secrets
 from datetime import datetime
 
 logging.basicConfig(level=logging.DEBUG)
 app = Flask(__name__)
+app.config['SECRET_KEY'] = '08dadb28a0ee217bff1205fcbe867674'
 
 
 @app.route('/')
@@ -51,7 +55,10 @@ def proposta():
                 'number_store': request.form['number_store'],
                 'status': request.form['status'],
                 'delivery_address': request.form['delivery_address'],
-                'date_issue': request.form['date_issue'],
+                'delivery_bairro': request.form['delivery_bairro'],
+                'delivery_municipio': request.form['delivery_municipio'],
+                'delivery_cep': request.form['delivery_cep'],
+                'delivery_uf': request.form['delivery_uf'],
                 'delivery_date': request.form['delivery_date'],
                 'withdrawal_date': request.form['withdrawal_date'],
                 'start_date': request.form['start_date'],
@@ -194,6 +201,21 @@ def get_proposal_id():
         return jsonify({'error': str(e)}), 500
 
 
+"""
+@app.route('/get_order_id', methods=['GET'])
+def get_order_id():
+    try:
+        order_id = sales_order_number()
+        if order_id is not None:
+            return jsonify({'order_id': order_id}), 200
+        else:
+            return jsonify({'error': 'Failed to generate order ID'}), 500
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+"""
+
+
 # rotas que manipulam a listagem dos clientes e edições dos mesmos
 @app.route('/lista_clientes')
 def listar_clientes():
@@ -253,6 +275,20 @@ def visualizar_proposta(proposal_id):
 
 @app.route('/proposta/alterar/<int:proposal_id>', methods=['GET', 'POST'])
 def editar_proposta(proposal_id):
+    proposal_data = buscar_proposta_por_id(proposal_id)
+    print("Proposal Data", proposal_data)
+    if not proposal_data:
+        return render_template('error.html', message="Proposta não encontrada.")
+
+    status_proposta = proposal_data[0]['proposta']['status']
+    print("Status:", status_proposta)
+
+    print("Proposal ID:", proposal_id)
+
+    if status_proposta in ['Aprovada', 'Reprovada']:
+        flash(f"A proposta {proposal_data[0]['proposta']['proposal_id']} já foi {status_proposta.lower()} e não pode ser alterada.")
+        return redirect(f'/proposta/visualizar/{proposal_id}')
+
     if request.method == 'POST':
         dados_atualizados = {
             'status': request.form['status'],
@@ -274,38 +310,48 @@ def editar_proposta(proposal_id):
         atualizar_proposta(proposal_id, dados_atualizados)
         propostas = listar_todas_propostas()
         return render_template('lista_propostas.html', propostas=propostas)
-    else:
-        proposal = buscar_proposta_por_id(proposal_id)
-        app.logger.info('Proposal data retrieved successfully: %s', proposal)
-        return render_template('editar_proposta.html', proposal=proposal)
+
+    return render_template('editar_proposta.html', proposal_data=proposal_data)
 
 
 @app.route('/submit_edit_proposal', methods=['POST'])
 def submit_edit_proposal():
     proposal_data = request.get_json()
     try:
-        updated_proposal = atualizar_proposta(proposal_data['proposal_id'], proposal_data)
+        atualizar_proposta(proposal_data['proposal_id'], proposal_data)
+        if proposal_data['status'] == 'Aprovada':
+            responses = []
+            try:
+                contrato_response = criar_contrato(proposal_data['proposal_id'])
+                responses.append({
+                    "success": True,
+                    "message": "Proposta aprovada e pronta para criar o contrato.",
+                    "contrato": contrato_response
+                })
+            except Exception as contract_error:
+                logging.error(f"Erro ao criar o pedido: {contract_error}", exc_info=True)
+                responses.append({
+                    "success": False,
+                    "message": f"Erro ao preparar o contrato: {str(contract_error)}."
+                })
 
-        if updated_proposal['success']:
-            proposal_dict = proposal_to_dict(updated_proposal['proposta'])
+            try:
+                pedido_response = criar_pedido(proposal_data['proposal_id'], sales_order_number())
+                responses.append({
+                    "success": True,
+                    "message": "Pedido de venda criado com sucesso.",
+                    "pedido": pedido_response
+                })
+            except Exception as pedido_error:
+                logging.error(f"Erro ao criar o pedido: {pedido_error}", exc_info=True)
+                responses.append({
+                    "success": False,
+                    "message": f"Erro ao preparar o contrato: {str(pedido_error)}."
+                })
 
-            if proposal_data['status'] == 'Aprovada':
-                try:
-                    return jsonify({
-                        "success": True,
-                        "message": "Proposta aprovada e pronta para criar o contrato.",
-                        "proposta": proposal_dict,
-                        "redirect_url": f"/contrato/{proposal_data['proposal_id']}"
-                    })
-                except Exception as contract_error:
-                    return jsonify({
-                        "success": False,
-                        "message": f"Erro ao preparar o contrato: {str(contract_error)}."
-                    }), 500
+            return jsonify({"success": True, "tarefas": responses}), 200
 
-            return jsonify({"success": True, "message": "Proposta atualizada com sucesso.", "proposta": proposal_dict})
-        else:
-            return jsonify({"success": False, "message": updated_proposal.get('message', 'Erro desconhecido')})
+        return jsonify({"success": True, "message": "Proposta atualizada com sucesso."}), 200
 
     except Exception as e:
         logging.error(f"Erro ao atualizar a proposta: {e}", exc_info=True)
@@ -325,8 +371,18 @@ def gerar_pdf_proposta(proposal_id):
                      mimetype='application/pdf')
 
 
+@app.route('/pedido/imprimir/<int:proposal_id>')
+def gerar_pdf_pedido(proposal_id):
+    proposal_data = buscar_proposta_por_id(proposal_id)
+    pedido_data = buscar_pedido_por_id(proposal_id)
+    order_id = pedido_data['order_id']
+    print('Pedido data:', pedido_data)
+    pdf_buffer = gerar_pdf_pedido_venda(order_id, proposal_data)
+    return send_file(pdf_buffer, as_attachment=True, download_name=f'pedido.pdf', mimetype='application/pdf')
+
+
 # rotas que manipulam o contrato
-@app.route('/contrato/<int:proposal_id>', methods=['GET', 'POST'])
+"""@app.route('/contrato/<int:proposal_id>', methods=['GET', 'POST'])
 def contrato(proposal_id=None):
     try:
         if request.method == 'GET':
@@ -338,9 +394,9 @@ def contrato(proposal_id=None):
                 return jsonify({'success': False, 'message': 'Erro ao obter os dados do contrato.'}), 404
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)}), 500
+"""
 
-
-@app.route('/submit_contract', methods=['POST'])
+"""@app.route('/submit_contract', methods=['POST'])
 def submit_contract():
     try:
         data = request.get_json()
@@ -351,7 +407,7 @@ def submit_contract():
             return response
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
-
+"""
 
 @app.route('/get_proposal_data', methods=['POST'])
 def get_proposal_data():
@@ -419,6 +475,7 @@ def editar_contrato(contract_id, proposal_id):
     if request.method == 'POST':
         dados_atualizados = {
             'contract_status': request.form['contract_status'],
+            'contract_type': request.form['contract_type'],
             'address_obs': request.form['address_obs'],
             'contract_comments': request.form['contract_comments']
         }
