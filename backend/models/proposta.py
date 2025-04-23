@@ -2,7 +2,7 @@ from flask import jsonify
 from sqlalchemy import func
 from backend.db_utils import create_session
 from backend.models.estrutura_db import (Client, Proposal, Product, Refund, ProposalProduct, ProposalRefund,
-                                         PaymentCondition)
+                                         PaymentCondition, Accessories)
 from datetime import datetime
 import logging
 
@@ -87,7 +87,7 @@ def proposta_comercial(form_data):
         current_date = datetime.now().strftime("%d/%m/%Y")
         required_fields = ['proposal_id', 'client_id', 'status', 'delivery_address', 'delivery_bairro', 'delivery_cep',
                            'delivery_municipio', 'delivery_uf', 'delivery_date', 'withdrawal_date', 'start_date',
-                           'end_date', 'period_days', 'validity', 'observations', 'oenf_obs', 'value']
+                           'end_date', 'period_days', 'validity', 'value']
 
         missing_fields = [field for field in required_fields if field not in form_data or not form_data[field]]
         if missing_fields:
@@ -146,8 +146,11 @@ def add_products(proposal_id, products):
                 unit_price=product['unit_price'],
                 price=product['price'],
                 extra_hours=product['extra_hours'],
-                rental_hours=product['rental_hours']
+                rental_hours=product['rental_hours'],
+                discount=product['discount'],
+                volts=product['volts']
             )
+            print("Products Data: ", proposal_product)
             session.add(proposal_product)
 
         session.commit()
@@ -172,8 +175,11 @@ def add_services(proposal_id, services):
                 cod=service['cod'],
                 service_quantity=service['service_quantity'],
                 service_unit_price=service['service_unit_price'],
-                service_price=service['service_price']
+                service_price=service['service_price'],
+                discount=service['discount'],
+                km=service['km']
             )
+            print("Refund Data: ", proposal_refund)
             session.add(proposal_refund)
 
         session.commit()
@@ -188,6 +194,36 @@ def add_services(proposal_id, services):
         session.close()
 
 
+def add_accessories(proposal_id, accessories):
+    session = create_session()
+    try:
+        accessories_id = gerar_accessory_id()
+        for accessory in accessories:
+            proposal_accessories = Accessories(
+                proposal_id=proposal_id,
+                accessories_id=accessories_id,
+                accessories_description=accessory['accessories_description'],
+                accessories_quantity=accessory['accessories_quantity'],
+                meters=accessory['meters'],
+                accessories_unit_price=accessory['accessories_unit_price'],
+                accessories_days=accessory['accessories_days'],
+                items_meters=accessory['items_meters'],
+                accessories_discount=accessory['accessories_discount'],
+                accessories_price=accessory['accessories_price']
+            )
+            print("Accessories Data: ", proposal_accessories)
+            session.add(proposal_accessories)
+        session.commit()
+        return jsonify(success=True)
+    except Exception as e:
+        session.rollback()
+        print(f"Error in add_accessories: {e}")
+        return jsonify(success=False, error=str(e))
+
+    finally:
+        session.close()
+
+
 def proposal_number():
     try:
         session = create_session()
@@ -196,6 +232,24 @@ def proposal_number():
         logging.debug(f"Last Proposal Id: {last_id}")
         current_id = last_id + 1
         logging.debug(f"Current Id: {current_id}")
+        session.close()
+        return current_id
+
+    except Exception as e:
+        print(f"Error: {e}")
+        # linha extra abaixo para tratar o erro JSON serializable
+        return jsonify(success=False, error=str(e))
+
+
+def gerar_accessory_id():
+    try:
+        session = create_session()
+
+        max_id = session.query(func.max(Accessories.accessories_id)).scalar()
+        last_id = max_id if max_id else 0
+        logging.debug(f"Last Accessory Id: {last_id}")
+        current_id = last_id + 1
+        logging.debug(f"Current Accessory Id: {current_id}")
         session.close()
         return current_id
 

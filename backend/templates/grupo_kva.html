@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='grupo_kva.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <title>Grupo de KVA</title>
+</head>
+<body>
+    <h2>Grupo de KVA</h2>
+    <form method="POST" id="group-form" action="{{ url_for('criar_grupo_kva') }}">
+        <div class="form-section">
+            <div class="form-grid">
+                <div>
+                    <label for="kva_group_id">Código:</label>
+                    <input type="text" id="kva_group_id" name="kva_group_id" required>
+                </div><br>
+                <div class="long-input">
+                    <label for="kva_group_description">Descrição</label>
+                    <input type="text" id="kva_group_description" name="kva_group_description" required>
+                </div><br>
+                <div class="long-input">
+                    <label for="family_id">Família:</label>
+                    <select name="family_id" id="family_id">
+                        {% for family in assets_family %}
+                            <option value=""></option>
+                        {% endfor %}
+                    </select>
+                </div><br>
+                <div>
+                    <label for="quantity">Quantidade:</label>
+                    <input type="text" id="quantity" name="quantity">
+                </div><br>
+                <div>
+                    <label for="unit_value">Valor Unitário</label>
+                    <input type="text" id="unit_value" name="unit_value">
+                </div>
+            </div>
+        </div>
+
+        <input type="submit" value="Confirmar">
+        <a href="/lista_grupos_kva">↩ Voltar</a>
+    </form>
+    <script src="{{ url_for('static', filename='grupo_kva.js') }}"></script>
+</body>
+</html>

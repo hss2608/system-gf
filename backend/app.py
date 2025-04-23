@@ -1,7 +1,8 @@
 from flask import Flask, render_template, request, jsonify, send_file, flash, redirect
 from backend.models.cadastro import Cadastro
 from backend.models.proposta import (buscar_clientes, buscar_produtos, buscar_servicos, proposta_comercial,
-                                     proposal_number, add_products, add_services, buscar_cond_pagamentos)
+                                     proposal_number, add_products, add_services, buscar_cond_pagamentos,
+                                     add_accessories, gerar_accessory_id)
 from backend.models.contrato import (Contrato, criar_contrato, contract_number, buscar_clientes_proposta,
                                      listar_todos_contratos, buscar_contrato_por_id, atualizar_contrato,
                                      contract_to_dict)
@@ -11,7 +12,12 @@ from backend.models.lista_propostas import (listar_todas_propostas, buscar_propo
 from backend.models.pedido_venda import (criar_pedido, sales_order_number, buscar_pedido_por_id)
 from backend.models.pdf_proposta import gerar_pdf
 from backend.models.pdf_contrato import gerar_pdf_contrato
-from backend.models.pdf_pedido_venda import gerar_pdf_pedido_venda 
+from backend.models.pdf_pedido_venda import gerar_pdf_pedido_venda
+from backend.models.familia_bens import criar_familias, listar_todas_familias, buscar_familia_por_id
+from backend.models.grupo_kva import criar_kva_group, listar_todos_grupo_kva, buscar_grupo_por_id
+from backend.models.fabricantes import criar_fabricante, listar_todos_fabricantes, buscar_fabricantes_por_id
+from backend.models.tipo_modelos_bens import criar_tipo_modelo, listar_todos_modelos, buscar_modelo_por_id
+from backend.models.bens import assets, buscar_familia_bens, buscar_fabricantes, buscar_tipo_modelo, buscar_centro_custo
 import traceback
 import logging
 import json
@@ -40,6 +46,7 @@ def proposta():
         client_data = {}
         product_data = {}
         service_data = {}
+        accessories_data = {}
         success_message = None
         error_message = None
 
@@ -74,6 +81,7 @@ def proposta():
             client_data = json.loads(request.form.get('client_data', '{}'))
             product_data = json.loads(request.form.get('product_data', '{}'))
             service_data = json.loads(request.form.get('service_data', '{}'))
+            accessories_data = json.loads(request.form.get('accessories_data', '{}'))
 
             print(request.method)
             data = request.form
@@ -85,7 +93,8 @@ def proposta():
                 error_message = "Failed to submit proposal form. Please try again."
 
         return render_template('proposta.html', client_data=client_data, product_data=product_data,
-                               service_data=service_data, success_message=success_message, error_message=error_message)
+                               service_data=service_data, accessories_data=accessories_data,
+                               success_message=success_message, error_message=error_message)
 
     except Exception as e:
         error_message = str(e)
@@ -112,7 +121,9 @@ def submit_proposal():
         if not services_response.json['success']:
             return services_response
 
-        return services_response
+        accessories_response = add_accessories(proposal_id, data['accessories'])
+        if not accessories_response.json['success']:
+            return accessories_response
 
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
@@ -201,21 +212,6 @@ def get_proposal_id():
         return jsonify({'error': str(e)}), 500
 
 
-"""
-@app.route('/get_order_id', methods=['GET'])
-def get_order_id():
-    try:
-        order_id = sales_order_number()
-        if order_id is not None:
-            return jsonify({'order_id': order_id}), 200
-        else:
-            return jsonify({'error': 'Failed to generate order ID'}), 500
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-"""
-
-
 # rotas que manipulam a listagem dos clientes e edições dos mesmos
 @app.route('/lista_clientes')
 def listar_clientes():
@@ -301,6 +297,7 @@ def editar_proposta(proposal_id):
             'price': request.form['price'],
             'extra_hours': request.form['extra_hours'],
             'rental_hours': request.form['rental_hours'],
+            'discount': request.form['discount'],
             'cod': request.form['cod'],
             'service_quantity': request.form['service_quantity'],
             'service_unit_price': request.form['service_unit_price'],
@@ -382,33 +379,6 @@ def gerar_pdf_pedido(proposal_id):
 
 
 # rotas que manipulam o contrato
-"""@app.route('/contrato/<int:proposal_id>', methods=['GET', 'POST'])
-def contrato(proposal_id=None):
-    try:
-        if request.method == 'GET':
-            contract_data = criar_contrato(proposal_id)
-            if contract_data:
-
-                return render_template('contrato.html', contract_data=[contract_data])
-            else:
-                return jsonify({'success': False, 'message': 'Erro ao obter os dados do contrato.'}), 404
-    except Exception as e:
-        return jsonify({'success': False, 'message': str(e)}), 500
-"""
-
-"""@app.route('/submit_contract', methods=['POST'])
-def submit_contract():
-    try:
-        data = request.get_json()
-        response = Contrato(data)
-        if response.json.get('success'):
-            return jsonify({'success': True, 'message': 'Contract submitted successfully'}), 200
-        else:
-            return response
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
-"""
-
 @app.route('/get_proposal_data', methods=['POST'])
 def get_proposal_data():
     try:
@@ -520,6 +490,142 @@ def gerar_pdf_contrato_geraforca(contract_id, proposal_id):
 
     return send_file(pdf_buffer, as_attachment=True, download_name=f'contrato_{contract_id}.pdf',
                      mimetype='application/pdf')
+
+
+@app.route('/bens/familia', methods=['GET', 'POST'])
+def criar_familia_bens():
+    return criar_familias()
+
+
+@app.route('/lista_familias')
+def listar_familias():
+    familias = listar_todas_familias()
+    return render_template('lista_familias.html', familias=familias)
+
+
+@app.route('/familia/visualizar/<int:family_id>')
+def visualizar_familia(family_id):
+    familia = buscar_familia_por_id(family_id)
+    app.logger.info('assets Family data retrieved successfully: %s', familia)
+    return render_template('visualizar_familias.html', familia=familia)
+
+
+@app.route('/get_assets_family', methods=['GET'])
+def get_assets_family():
+    try:
+        assets_family = listar_todas_familias()
+        print("Família de bens: ", assets_family)
+        if assets_family:
+            assets_family_list = [
+                {'family_id': family['family_id'], 'family_description': family['family_description']}
+                for family in assets_family
+            ]
+            return jsonify(success=True, assets_family=assets_family_list)
+        else:
+            return jsonify(success=False, error="Nenhuma família de bens encontrada.")
+
+    except Exception as e:
+        app.logger.error(f"Erro ao buscar família de bens: {str(e)}")
+        return jsonify(success=False, error="Erro ao buscar família de bens.")
+
+
+@app.route('/grupo/kva', methods=['GET', 'POST'])
+def criar_grupo_kva():
+    return criar_kva_group()
+
+
+@app.route('/lista_grupos_kva')
+def listar_grupos():
+    grupos = listar_todos_grupo_kva()
+    return render_template('lista_grupos_kva.html', grupos=grupos)
+
+
+@app.route('/grupo/visualizar/<int:kva_group_id>')
+def visualizar_grupo(kva_group_id):
+    grupo = buscar_grupo_por_id(kva_group_id)
+    app.logger.info('Groups KVA data retrieved successfully: %s', grupo)
+    return render_template('visualizar_grupo_kva.html', grupo=grupo)
+
+
+@app.route('/get_kva_group', methods=['GET'])
+def get_kva_group(kva_group_id):
+    try:
+        kva_group = buscar_grupo_por_id(kva_group_id)
+        if kva_group:
+            kva_group_list = [kva_group]
+            return jsonify(success=True, kva_group=kva_group_list)
+        else:
+            return jsonify(success=False, error="Nenhum grupo de kva encontrado.")
+
+    except Exception as e:
+        app.logger.error(f"Erro ao buscar grupos de kva: {str(e)}")
+        return jsonify(success=False, error="Erro ao grupos de kva.")
+
+
+@app.route('/fabricante', methods=['GET', 'POST'])
+def criar_fabricantes():
+    return criar_fabricante()
+
+
+@app.route('/lista_fabricantes')
+def listar_fabricantes():
+    fabricantes = listar_todos_fabricantes()
+    return render_template('lista_fabricantes.html', fabricantes=fabricantes)
+
+
+@app.route('/fabricante/visualizar/<int:manufacturer_id>')
+def visualizar_fabricante(manufacturer_id):
+    fabricante = buscar_fabricantes_por_id(manufacturer_id)
+    app.logger.info('Assets Manufacturer data retrieved successfully: %s', fabricante)
+    return render_template('visualizar_fabricante.html', fabricante=fabricante)
+
+
+@app.route('/get_manufacturer', methods=['GET'])
+def get_manufacturer(manufacturer_id):
+    try:
+        manufacturer = buscar_fabricantes_por_id(manufacturer_id)
+        if manufacturer:
+            manufacturer_list = [manufacturer]
+            return jsonify(success=True, manufacturer=manufacturer_list)
+        else:
+            return jsonify(success=False, error="Nenhum fabricante encontrado.")
+
+    except Exception as e:
+        app.logger.error(f"Erro ao buscar fabricantes: {str(e)}")
+        return jsonify(success=False, error="Erro ao buscar fabricantes.")
+
+
+@app.route('/modelo', methods=['GET', 'POST'])
+def criar_modelo():
+    return criar_tipo_modelo()
+
+
+@app.route('/lista_modelos')
+def listar_modelos():
+    modelos = listar_todos_modelos()
+    return render_template('lista_modelos.html', modelos=modelos)
+
+
+@app.route('/modelo/visualizar/<int:model_type_id>')
+def visualizar_modelo(model_type_id):
+    modelo = buscar_modelo_por_id(model_type_id)
+    app.logger.info('Model Type data retrieved successfully: %s', modelo)
+    return render_template('visualizar_modelo.html', modelo=modelo)
+
+
+@app.route('/get_model_type', methods=['GET'])
+def get_model_type(model_type_id):
+    try:
+        model_type = buscar_modelo_por_id(model_type_id)
+        if model_type:
+            model_list = [model_type]
+            return jsonify(success=True, model_type=model_list)
+        else:
+            return jsonify(success=False, error="Nenhum fabricante encontrado.")
+
+    except Exception as e:
+        app.logger.error(f"Erro ao buscar modelos: {str(e)}")
+        return jsonify(success=False, error="Erro ao buscar modelos.")
 
 
 if __name__ == '__main__':

@@ -242,5 +242,3 @@ def proposal_to_dict(proposal):
 
     finally:
         session.close()
-
-

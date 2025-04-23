@@ -49,6 +49,7 @@ class Product(Base):
     weigth = Column(Integer)
 
     proposal_product = relationship('ProposalProduct', back_populates='product')
+    assets = relationship('Assets', back_populates='product')
 
 
 class Refund(Base):
@@ -90,6 +91,7 @@ class Proposal(Base):
     contract = relationship('Contract', back_populates='proposal')
     payment_condition = relationship('PaymentCondition', back_populates='proposal')
     order = relationship('SalesOrder', back_populates='proposal')
+    accessories = relationship('Accessories', back_populates='proposal')
 
 
 class ProposalProduct(Base):
@@ -102,6 +104,8 @@ class ProposalProduct(Base):
     price = Column(String)
     extra_hours = Column(String)
     rental_hours = Column(String)
+    discount = Column(String)
+    volts = Column(Integer)
 
     proposal = relationship('Proposal', back_populates='products')
     product = relationship('Product', back_populates='proposal_product')
@@ -115,9 +119,28 @@ class ProposalRefund(Base):
     service_quantity = Column(Integer)
     service_unit_price = Column(String)
     service_price = Column(String)
+    discount = Column(String)
+    km = Column(String)
 
     proposal = relationship('Proposal', back_populates='refunds')
     refund = relationship('Refund', back_populates='proposal_refund')
+
+
+class Accessories(Base):
+    __tablename__ = 'accessories'
+
+    proposal_id = Column(Integer, ForeignKey('proposal.proposal_id'), primary_key=True)
+    accessories_id = Column(Integer, primary_key=True)
+    accessories_description = Column(String)
+    accessories_quantity = Column(String)
+    meters = Column(Integer)
+    accessories_unit_price = Column(String)
+    accessories_days = Column(Integer)
+    items_meters = Column(Integer)
+    accessories_discount = Column(String)
+    accessories_price = Column(String)
+
+    proposal = relationship('Proposal', back_populates='accessories')
 
 
 class Contract(Base):
@@ -182,6 +205,149 @@ class PaymentCondition(Base):
     description = Column(String)
 
     proposal = relationship('Proposal', back_populates='payment_condition')
+
+
+class CostCenter(Base):
+    __tablename__ = 'cost_center'
+
+    id = Column(Integer, primary_key=True)
+    description = Column(String)
+
+    assets = relationship('Assets', back_populates='cost_center')
+
+
+class AssetsFamily(Base):
+    __tablename__ = 'assets_family'
+
+    id = Column(Integer, primary_key=True)
+    description = Column(String)
+
+    def to_dict(self):
+        return {
+            'family_id': self.id,
+            'family_description': self.description
+        }
+
+    kva_group = relationship('KvaGroup', back_populates='assets_family')
+    assets = relationship('Assets', back_populates='assets_family')
+
+
+class AssetsManufacturer(Base):
+    __tablename__ = 'assets_manufacturer'
+
+    id = Column(Integer, primary_key=True)
+    acronym = Column(String)
+    description = Column(String)
+
+    def to_dict(self):
+        return {
+            'manufacturer_id': self.id,
+            'acronym': self.acronym,
+            'description': self.description
+        }
+
+    model_type = relationship('ModelType', back_populates='assets_manufacturer')
+    manufacturer_assets = relationship(
+        'Assets', back_populates='assets_manufacturer', foreign_keys='Assets.manufacturer_id'
+    )
+    engine_assets = relationship(
+        'Assets', back_populates='engine_manufacturer', foreign_keys='Assets.engine_manufacturer_id'
+    )
+
+
+class KvaGroup(Base):
+    __tablename__ = 'kva_group'
+
+    id = Column(Integer, primary_key=True)
+    description = Column(String)
+    family_id = Column(Integer, ForeignKey('assets_family.id'))
+    quantity = Column(String)
+    unit_value = Column(String)
+
+    def to_dict(self):
+        return {
+            'kva_group_id': self.id,
+            'kva_group_description': self.description,
+            'family_id': self.family_id,
+            'quantity': self.quantity,
+            'unit_value': self.unit_value
+        }
+
+    assets_family = relationship('AssetsFamily', back_populates='kva_group')
+    model_type = relationship('ModelType', back_populates='kva_group')
+
+
+class ModelType(Base):
+    __tablename__ = 'model_type'
+
+    id = Column(Integer, primary_key=True)
+    description = Column(String)
+    manufacturer_id = Column(Integer, ForeignKey('assets_manufacturer.id'))
+    kva_group_id = Column(Integer, ForeignKey('kva_group.id'))
+    model = Column(String)
+
+    assets_manufacturer = relationship('AssetsManufacturer', back_populates='model_type')
+    kva_group = relationship('KvaGroup', back_populates='model_type')
+    assets = relationship('Assets', back_populates='model_type')
+
+    def to_dict(self):
+        return {
+            'model_type_id': self.id,
+            'description': self.description,
+            'manufacturer_id': self.manufacturer_id,
+            'acronym': self.assets_manufacturer.acronym if self.assets_manufacturer else None,
+            'manufacturer_description': self.assets_manufacturer.description if self.assets_manufacturer else None,
+            'kva_group_id': self.kva_group_id,
+            'kva_group_description': self.kva_group.description if self.kva_group else None,
+            'model': self.model
+        }
+
+
+class Assets(Base):
+    __tablename__ = 'assets'
+
+    id = Column(Integer, primary_key=True)
+    model_type_id = Column(Integer, ForeignKey('model_type.id'))
+    family_id = Column(Integer, ForeignKey('assets_family.id'))
+    manufacturer_id = Column(Integer, ForeignKey('assets_manufacturer.id'))
+    model_unit = Column(String)
+    serial_unit = Column(String)
+    cost_center_id = Column(Integer, ForeignKey('cost_center.id'))
+    purchase_value = Column(String)
+    purchase_date = Column(Date)
+    purchase_nf = Column(String)
+    year_manufacturer = Column(Integer)
+    age = Column(Integer)
+    engine_manufacturer_id = Column(Integer, ForeignKey('assets_manufacturer.id'))
+    engine_model = Column(String)
+    characteristics = Column(String)
+    tank = Column(String)
+    metrics = Column(String)
+    tank_property = Column(String)
+    voltage = Column(String)
+    date_issue = Column(Date)
+    current = Column(String)
+    average = Column(String)
+    weight = Column(String)
+    situation = Column(String)
+    product_id = Column(Integer, ForeignKey('products.product_id'))
+    meter = Column(String)
+    meter_type = Column(String)
+    meter_position = Column(Integer)
+    accumulated_meter = Column(Integer)
+    meter_limit = Column(Integer)
+    date_followup = Column(Date)
+
+    cost_center = relationship('CostCenter', back_populates='assets')
+    assets_manufacturer = relationship(
+        'AssetsManufacturer', foreign_keys=[manufacturer_id], back_populates='manufacturer_assets'
+    )
+    engine_manufacturer = relationship(
+        'AssetsManufacturer', foreign_keys=[engine_manufacturer_id], back_populates='engine_assets'
+    )
+    model_type = relationship('ModelType', back_populates='assets')
+    assets_family = relationship('AssetsFamily', back_populates='assets')
+    product = relationship('Product', back_populates='assets')
 
 
 # esquema que gera automaticamente campos a partir das colunas de um modelo ou tabela SQLAlchemy

@@ -1,16 +1,16 @@
-document.getElementById('client-form').addEventListener('submit', function(event) {
+document.getElementById('manufacturer-form').addEventListener('submit', function(event) {
     event.preventDefault();
 
     var formData = new FormData(this);
-    fetch('/cadastro', {
+    fetch('/fabricante', {
         method: 'POST',
         body: formData
     })
     .then(response => {
         if (response.ok) {
-            window.location.href = '/lista_clientes';
+            window.location.href = '/lista_fabricantes';
         } else {
-            alert('Erro ao cadastrar cliente.');
+            alert('Erro ao cadastrar fabricantes');
         }
     })
     .catch(error => {

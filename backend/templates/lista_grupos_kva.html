@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grupos de KVA</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='lista_grupos_kva.css') }}">
+</head>
+<body>
+    <div id="acoes">
+        <button id="incluir">Incluir</button>
+        <button id="visualizar" disabled>Visualizar</button>
+    </div>
+    <h2>Grupos de KVA</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Código</th>
+                <th>Descrição</th>
+                <th>Família</th>
+                <th>Quantidade</th>
+                <th>Valor Unitário</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for grupo in grupos %}
+                <tr id="grupo" class="grupo" data-group-id="{{ grupo.kva_group_id }}">
+                    <td class="kva-group-id">{{ grupo.kva_group_id }}</td>
+                    <td>{{ grupo.kva_group_description }}</td>
+                    <td class="family-id">{{ grupo.family_id }}</td>
+                    <td class="quantity">{{ grupo.quantity }}</td>
+                    <td class="unit-value">{{ grupo.unit_value }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="/">↩</a>
+    <script src="{{ url_for('static', filename='lista_grupos_kva.js') }}"></script>
+</body>
+</html>

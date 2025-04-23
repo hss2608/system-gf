@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='fabricante.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <title>Fabricantes de Bens</title>
+</head>
+<body>
+    <h2>Fabricantes de Bens</h2>
+    <form method="POST" id="manufacturer-form" action="{{ url_for('criar_fabricantes') }}">
+        <div class="form-section">
+            <div class="form-grid">
+                <div>
+                    <label for="acronym">Descrição</label>
+                    <input type="text" id="acronym" name="acronym" required>
+                </div><br>
+                <div class="long-input">
+                    <label for="description">Família:</label>
+                    <input type="text" id="description" name="description" required>
+                </div><br>
+            </div>
+        </div>
+
+        <input type="submit" value="Confirmar">
+        <a href="/lista_fabricantes">↩ Voltar</a>
+    </form>
+    <script src="{{ url_for('static', filename='fabricante.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+function dateVisit() {
+    const dateInput = document.getElementById('date_visit');
+
+    dateInput.addEventListener('input', (event) => {
+        let value = dateInput.value;
+
+        value = value.replace(/\D/g, '');
+
+        if (value.length >= 3 && value.length <= 4) {
+            value = value.replace(/(\d{2})(\d{1,2})/, '$1/$2');
+        } else if (value.length >= 5) {
+            value = value.replace(/(\d{2})(\d{2})(\d{1,4})/, '$1/$2/$3');
+        }
+
+        // Atualiza o valor do campo
+        dateInput.value = value.substring(0, 10);
+    });
+}

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='familia_bens.css') }}">
+    <title>Familia de Bens</title>
+</head>
+<body>
+    <h2>Familia de Bens</h2>
+    <form method="POST" id="family-form" action="{{ url_for('criar_familia_bens') }}">
+        <div class="form-section">
+            <div class="form-grid">
+                <div>
+                    <label for="family_id">Família:</label>
+                    <input type="text" id="family_id" name="family_id" required>
+                </div><br>
+                <div class="long-input">
+                    <label for="family_description">Nome da família:</label>
+                    <input type="text" id="family_description" name="family_description" required>
+                </div>
+            </div>
+        </div>
+
+        <input type="submit" value="Confirmar">
+        <a href="/lista_familias">↩ Voltar</a>
+    </form>
+    <script src="{{ url_for('static', filename='familia_bens.js') }}"></script>
+</body>
+</html>

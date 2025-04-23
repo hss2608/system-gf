@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Visualizar Grupos de KVA</title>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='visualizar_grupo_kva.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h2>Informações Grupos de KVA</h2>
+
+        <div class="grupos-visualizacao" data-group-id="{{ grupo['kva_group_id'] }}">
+            <p>
+                <strong>Código:</strong>
+                <span class="kva-group-id"> {{ grupo['kva_group_id'] }}</span>
+            </p>
+            <p><strong>Descrição:</strong> {{ grupo['kva_group_description'] }}</p>
+            <p>
+                <strong>Família:</strong>
+                <span class="family-id"> {{ grupo['family_id'] }}</span>
+            </p>
+            <p>
+                <strong>Quantidade:</strong>
+                <span class="quantity"> {{ grupo['quantity'] }}</span>
+            </p>
+            <p>
+                <strong>Valor Unitário:</strong>
+                <span class="unit-value"> {{ grupo['unit_value'] }}</span>
+            </p>
+        </div>
+
+        <script src="{{ url_for('static', filename='visualizar_grupo_kva.js') }}"></script>
+        <a href="/lista_grupos_kva" class="btn-back">↩ Voltar</a>
+    </div>
+</body>
+</html>

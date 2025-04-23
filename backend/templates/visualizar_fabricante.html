@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Visualizar Fabricante de Bens</title>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='visualizar_fabricante.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h2>Informações Fabricante</h2>
+
+        <div class="fabricante-visualizacao" data-manufacturer-id="{{ fabricante['manufacturer_id'] }}">
+            <p><strong>Fabricante:</strong> {{ fabricante['acronym'] }}</p>
+            <p><strong>Nome:</strong> {{ fabricante['description'] }}</p>
+        </div>
+
+        <script src="{{ url_for('static', filename='visualizar_fabricante.js') }}"></script>
+        <a href="/lista_fabricantes" class="btn-back">↩ Voltar</a>
+    </div>
+</body>
+</html>

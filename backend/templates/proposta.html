@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Proposta Comercial</title>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdn.tiny.cloud/1/8wtxfoo5se51jl9zmlz4obivgwepjmxh88vtkopcqk3iuntr/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Spectral|Rubik">
     <link rel="stylesheet" href="{{ url_for('static', filename='proposta.css') }}">
 </head>
 <body>
@@ -128,10 +130,6 @@
                 </div>
             </div><br>
             <div>
-                <label for="observations">OBSERVAÇÕES:</label>
-                <textarea name="observations" id="observations" maxlength="200" rows="4" cols="50" placeholder="Observações..."></textarea>
-            </div><br>
-            <div>
                 <label for="oenf_obs">OBSERVAÇÕES DA OENF:</label>
                 <textarea name="oenf_obs" id="oenf_obs" maxlength="200" rows="4" cols="50" placeholder="Observações da OENF..."></textarea>
             </div>
@@ -158,10 +156,13 @@
                             <th>TIPO</th>
                             <th class="wide-column">DESCRIÇÃO COMPLEMENTAR</th>
                             <th>QTDE</th>
+                            <th>VOLTAGEM (V)</th>
+                            <th>HRS FRANQUIA</th>
                             <th class="wide-column">R$ UN</th>
+                            <th>DESC.%</th>
                             <th class="wide-column">R$</th>
                             <th>VAL HR EXTRAS</th>
-                            <th>HRS FRANQUIA</th>
+
                         </tr>
                     </thead>
                     <tbody id="product_table_body">
@@ -172,10 +173,12 @@
                             <td class="type_placeholder">{{ product_data.type or '' }}</td>
                             <td class="add_description_placeholder">{{ product_data.add_description or '' }}</td>
                             <td class="quantity_placeholder"></td>
+                            <td class="volts_placeholder"></td>
+                            <td class="rental_hours_placeholder"></td>
                             <td class="unit_price_placeholder"></td>
+                            <td class="discount_placeholder"></td>
                             <td class="price_placeholder"></td>
                             <td class="extra_hours_placeholder"></td>
-                            <td class="rental_hours_placeholder"></td>
                         </tr>
                     </tbody>
                 </table>
@@ -200,6 +203,8 @@
                             <th class="wide-column">DESCRIÇÃO</th>
                             <th class="wide-column2">QTDE</th>
                             <th class="wide-column3">R$ UNIT</th>
+                            <th class="wide-column3">DESC.%</th>
+                            <th class="wide-column3">KM</th>
                             <th class="wide-column">R$</th>
                         </tr>
                     </thead>
@@ -209,7 +214,50 @@
                             <td class="descript_placeholder">{{ service_data.descript or '' }}</td>
                             <td class="service_quantity_placeholder"></td>
                             <td class="service_unit_price_placeholder"></td>
+                            <td class="discount_service_placeholder"></td>
+                            <td class="km_placeholder"></td>
                             <td class="service_price_placeholder"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="manual-accessory-add" style="margin-bottom: 10px;">
+            <label for="manualAccessorySelect"><strong>Adicionar Acessório Manual:</strong></label>
+            <select id="manualAccessorySelect">
+                <option value="">Selecione um acessório</option>
+            </select>
+            <button type="button" onclick="addManualAccessory()">Adicionar</button>
+        </div>
+
+        <!-- Acessórios -->
+        <div class="form-section">
+            <h3>Acessórios</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="wide-column">DESCRIÇÃO</th>
+                            <th>QTDE/fase</th>
+                            <th>METROS</th>
+                            <th>R$ UNIT</th>
+                            <th>DIAS COBRADOS</th>
+                            <th>ITEM/MTS</th>
+                            <th>DESC.%</th>
+                            <th>R$</th>
+                        </tr>
+                    </thead>
+                    <tbody id="accessories_table_body">
+                        <tr>
+                            <td class="accessories_description_placeholder"></td>
+                            <td class="accessories_quantity_placeholder"></td>
+                            <td class="meters_placeholder"></td>
+                            <td class="accessories_unit_price_placeholder"></td>
+                            <td class="accessories_days_placeholder"></td>
+                            <td class="items_meters_placeholder"></td>
+                            <td class="accessories_discount_placeholder"></td>
+                            <td class="accessories_price_placeholder"></td>
                         </tr>
                     </tbody>
                 </table>
@@ -225,6 +273,11 @@
                     <input type="text" id="value" name="value" readonly>
                 </div>
             </div>
+        </div>
+
+        <div class="form-section">
+            <h3>Observações</h3>
+            <textarea name="observations" id="observations" placeholder="Digite as observações da proposta aqui..."></textarea>
         </div>
 
         <button class="submit" type="submit">CONFIRMAR</button><br>

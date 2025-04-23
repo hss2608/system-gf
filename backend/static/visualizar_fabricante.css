@@ -15,26 +15,9 @@ body {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-h2, h3, h4 {
+h2 {
     text-align: center;
     color: #444;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 20px 0;
-}
-
-table th, table td {
-    padding: 12px 15px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
-}
-
-table th {
-    background-color: #f8f8f8;
-    font-weight: bold;
 }
 
 .btn-back {
@@ -52,7 +35,7 @@ table th {
     background-color: #ff6600;
 }
 
-.proposta-visualizacao {
+.fabricante-visualizacao {
     margin: 20px 0;
     padding: 10px 15px;
     border: 1px solid #ddd;
@@ -60,6 +43,6 @@ table th {
     background-color: #fafafa;
 }
 
-.proposta-visualizacao p {
+.fabricante-visualizacao p {
     margin: 5px 0;
 }

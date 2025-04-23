@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fabricantes</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='lista_fabricantes.css') }}">
+</head>
+<body>
+    <div id="acoes">
+        <button id="incluir">Incluir</button>
+        <button id="visualizar" disabled>Visualizar</button>
+    </div>
+    <h2>Fabricantes</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Fabricante</th>
+                <th>Nome</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for fabricante in fabricantes %}
+                <tr id="fabricante" class="fabricante" data-manufacturer-id="{{ fabricante.manufacturer_id }}">
+                    <td>{{ fabricante.acronym }}</td>
+                    <td>{{ fabricante.description }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="/">↩</a>
+    <script src="{{ url_for('static', filename='lista_fabricantes.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='tipo_modelo.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <title>Tipos de Modelos</title>
+</head>
+<body>
+    <h2>Tipos de Modelos</h2>
+    <form method="POST" id="model-form" action="{{ url_for('criar_modelo') }}">
+        <div class="form-section">
+            <div class="form-grid">
+                <div>
+                    <label for="model_type_id">Código:</label>
+                    <input type="text" id="model_type_id" name="model_type_id" required>
+                </div><br>
+                <div>
+                    <label for="model">Código:</label>
+                    <input type="text" id="model" name="model" required>
+                </div><br>
+                <div class="long-input">
+                    <label for="description">Descrição</label>
+                    <input type="text" id="description" name="description" required>
+                </div><br>
+                <div class="long-input">
+                    <label for="manufacturer_id">Fabricante:</label>
+                    <select name="manufacturer_id" id="manufacturer_id">
+                        {% for fabricante in manufacturer %}
+                            <option value=""></option>
+                        {% endfor %}
+                    </select>
+                </div><br>
+                <div class="long-input">
+                    <label for="kva_group_id">Fabricante:</label>
+                    <select name="kva_group_id" id="kva_group_id">
+                        {% for grupo in kva_group %}
+                            <option value=""></option>
+                        {% endfor %}
+                    </select>
+                </div><br>
+            </div>
+        </div>
+
+        <input type="submit" value="Confirmar">
+        <a href="/lista_modelos">↩ Voltar</a>
+    </form>
+    <script src="{{ url_for('static', filename='tipo_modelo.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tipos de Modelos</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='lista_modelos.css') }}">
+</head>
+<body>
+    <div id="acoes">
+        <button id="incluir">Incluir</button>
+        <button id="visualizar" disabled>Visualizar</button>
+    </div>
+    <h2>Tipos de Modelos</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Tipo de Modelo</th>
+                <th>Descrição</th>
+                <th>Fabricante</th>
+                <th>Nome</th>
+                <th>Grupo KVA</th>
+                <th>Desc.Grupo</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for modelo in modelos %}
+                <tr id="modelo" class="modelo" data-model-id="{{ modelo.model_type_id }}">
+                    <td>{{ modelo.model }}</td>
+                    <td>{{ modelo.description }}</td>
+                    <td>{{ modelo.acronym }}</td>
+                    <td>{{ modelo.manufactuer_description }}</td>
+                    <td class="kva-group-id">{{ modelo.kva_group_id }}</td>
+                    <td>{{ modelo.kva_group_desciption }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="/">↩</a>
+    <script src="{{ url_for('static', filename='lista_modelos.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Visualizar Familia</title>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='visualizar_familias.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h2>Informações da Família</h2>
+
+        <div class="familia-visualizacao" data-family-id="{{ familia['family_id'] }}">
+            <p>
+                <strong>Família:</strong>
+                <span class="family-id"> {{ familia['family_id'] }}</span>
+            </p>
+            <p><strong>Nome da Família:</strong> {{ familia['family_description'] }}</p>
+        </div>
+
+        <script src="{{ url_for('static', filename='visualizar_familias.js') }}"></script>
+        <a href="/lista_familias" class="btn-back">↩ Voltar</a>
+    </div>
+</body>
+</html>
