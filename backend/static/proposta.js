@@ -853,7 +853,6 @@ function calculateAccessoryPrice(row) {
     return Math.round(final * 100) / 100;
 }
 
-
 function updateAccessoryPrice(input) {
     const row = $(input).closest('tr');
     const price = calculateAccessoryPrice(row);
@@ -941,6 +940,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function submitProposal() {
 
+    const btn = document.querySelector('#submit-button');
+    btn.disabled = true;
+    btn.textContent = 'Salvando...';
+
     var proposalData = {
         proposal_id: $('#proposal_id').val(),
         client_id: $('#client_id').val(),
@@ -963,7 +966,7 @@ function submitProposal() {
         delivery_cep: $('#delivery_cep').val(),
         delivery_uf: $('#delivery_uf').val(),
         validity: $('#validity').val(),
-        observations: $('#observations').val(),
+        observations: tinymce.get('observations').getContent().trim(),
         oenf_obs: $('#oenf_obs').val().trim(),
         value: $('#value').val(),
     };
@@ -972,17 +975,25 @@ function submitProposal() {
     proposalData.accessories = collectAccessories();
 
     console.log('Proposal Data:', proposalData);
-    $.ajax({
-        url: '/submit_proposal',
-        type: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify(proposalData),
-        success: function(response) {
-            console.log('Proposta enviada com sucesso:', response);
+    fetch('/submit_proposal', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
         },
-        error: function(error) {
-            console.error('Erro ao enviar proposta:', error);
+        body: JSON.stringify(proposalData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert("Proposta salva com sucesso!");
+            window.location.href = "/lista_propostas"; // redireciona após salvar
+        } else {
+            alert("Erro: " + data.error);
         }
+    })
+    .catch(error => {
+        console.error('Erro ao enviar proposta:', error);
+        alert("Erro interno. Tente novamente.");
     });
 }
 
@@ -998,11 +1009,10 @@ function collectProducts() {
             volts: $(this).find('.volts_input').val(),
             rental_hours: $(this).find('.rental_hours_input').val(),
             unit_price: $(this).find('.unit_price_input').val(),
-            discount: $(this).find('.discount_input').text(),
+            discount: $(this).find('.discount_input').val().trim(),
             price: $(this).find('.price_placeholder').text(),
             add_description: $(this).find('.add_description_placeholder').text(),
             extra_hours: $(this).find('.extra_hours_input').val(),
-
         };
         products.push(product);
     });
@@ -1018,7 +1028,7 @@ function collectServices() {
             descript: $(this).find('.descript_placeholder').text(),
             service_quantity: $(this).find('.service_quantity_input').val(),
             service_unit_price: $(this).find('.service_unit_price_input').text(),
-            discount: $(this).find('.discount_service_input').text(),
+            discount: $(this).find('.discount_service_input').val().trim(),
             km: $(this).find('.km_input').val(),
             service_price: $(this).find('.service_price_placeholder').text()
         };
@@ -1030,21 +1040,46 @@ function collectServices() {
 
 function collectAccessories() {
     var accessories = [];
-    $('#accessories_table_body tr').each(function() {
-        var accessory = {
-            accessories_description: $(this).find('.accessories_description_placeholder').text(),
-            accessories_quantity: $(this).find('.accessories_quantity_input').text(),
-            meters: $(this).find('.meters_input').text(),
-            accessories_unit_price: $(this).find('.accessories_unit_price_input').text(),
-            accessories_days: $(this).find('.accessories_days_input').text(),
-            items_meters: $(this).find('.items_meters_input').text(),
-            accessories_discount: $(this).find('.accessories_discount_input').text(),
-            accessories_price: $(this).find('.accessories_price_placeholder').text()
-        };
-        accessories.push(accessory);
+
+    $('#accessories_table_body tr').each(function () {
+        var row = $(this);
+        var isManual = row.attr('data-manual') === 'true';
+
+        var description = row.find('.accessories_description_placeholder').text().trim();
+        var quantity = row.find('.accessories_quantity_input').val()?.trim() || '';
+        var unit_price = row.find('.accessories_unit_price_input').val()?.trim() || '';
+        var discount = row.find('.accessories_discount_input').val()?.trim() || '';
+        var days = row.find('.accessories_days_input').val()?.trim() || '';
+        var price = row.find('.accessories_price_placeholder').text()?.trim() || '';
+
+        if (isManual) {
+            accessories.push({
+                accessories_description: description,
+                accessories_quantity: quantity,
+                meters: 0,  // não se aplica
+                accessories_unit_price: unit_price,
+                accessories_days: days,
+                items_meters: 0, // não se aplica
+                accessories_discount: discount,
+                accessories_price: price
+            });
+        } else {
+            var meters = row.find('.meters_input').val()?.trim() || '';
+            var items_meters = row.find('.items_meters_input').val()?.trim() || '';
+
+            accessories.push({
+                accessories_description: description,
+                accessories_quantity: quantity,
+                meters: meters,
+                accessories_unit_price: unit_price,
+                accessories_days: days,
+                items_meters: items_meters,
+                accessories_discount: discount,
+                accessories_price: price
+            });
+        }
     });
     return accessories;
-    console.log('Accessories: ', accessories);
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -1061,24 +1096,11 @@ document.addEventListener('DOMContentLoaded', function() {
             $(this).remove();
         }
     });
-})
 
-document.getElementById('proposal-form').addEventListener('submit', function(event) {
-    event.preventDefault();
-
-    var formData = new FormData(this);
-    fetch('/proposta', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => {
-        if (response.ok) {
-            window.location.href = '/lista_propostas';
-        } else {
-            alert('Erro ao cadastrar proposta.');
+    $('#accessories_table_body tr').each(function() {
+        var isRowEmpty = !$.trim($(this).find('.accessories_description_placeholder').text());
+        if (isRowEmpty) {
+            $(this).remove();
         }
-    })
-    .catch(error => {
-        console.error('Erro:', error);
     });
-});
+})

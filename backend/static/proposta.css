@@ -142,7 +142,7 @@ th, td {
     background-color: #d3d3d3;
 }
 
-button[type="submit"] {
+button[type="button"] {
     background-color: #ff4500;
     color: white;
     font-size: 12px;
@@ -156,7 +156,7 @@ button[type="submit"] {
     border-radius: 4px;
 }
 
-button[type="submit"]:hover {
+button[type="button"]:hover {
     background-color: #ff6600;
 }
 

@@ -1,7 +1,8 @@
-from flask import render_template, request
+from flask import render_template, request, jsonify
 from backend.db_utils import create_session
-from backend.models.estrutura_db import Assets, ModelType, AssetsManufacturer, CostCenter, AssetsFamily
+from backend.models.estrutura_db import Assets, ModelType, AssetsManufacturer, CostCenter, AssetsFamily, AssetsFollowUp
 from datetime import datetime
+from sqlalchemy import func
 
 
 def buscar_tipo_modelo(id):
@@ -77,7 +78,7 @@ def buscar_centro_custo(id):
         session.close()
 
 
-def assets():
+def add_assets():
     session = None
     try:
         current_date = datetime.now().strftime("%d/%m/%Y")
@@ -165,3 +166,99 @@ def assets():
     finally:
         if session:
             session.close()
+
+
+def buscar_assets():
+    session = create_session()
+    try:
+        
+        return
+
+    except Exception as e:
+        print(f"Error: {e}")
+        return render_template('error.html', error_message=str(e))
+
+    finally:
+        if session:
+            session.close()
+
+
+def add_assets_follow_up(assets_follow_up):
+    session = create_session()
+    try:
+        if not isinstance(assets_follow_up, list):
+            raise ValueError("Esperava-se uma lista de dados para Assets Follow Up")
+
+        last_assets_id = session.query(func.max(AssetsFollowUp.id)).scalar() or 0
+
+        for asset in assets_follow_up:
+            current_id = asset.get('follow_up_id')
+            if current_id is None or current_id in ('', "None"):
+                last_assets_id += 1
+                current_id = last_assets_id
+            assets = AssetsFollowUp(
+                id=current_id,
+                assets_id=asset.get('assets_id', ''),
+                contract_id=asset.get('contract_id', ''),
+                dt_start=asset.get('dt_start', ''),
+                dt_end=asset.get('dt_end', ''),
+                diesel_sent=asset.get('diesel_sent', ''),
+                diesel_used=asset.get('diesel_used', ''),
+                diesel_returned=asset.get('diesel_returned', ''),
+                franchise=asset.get('franchise', ''),
+                initial_horimeter=asset.get('initial_horimeter', ''),
+                final_horimeter=asset.get('final_horimeter', ''),
+                total_hours=asset.get('total_hours', ''),
+                extra_hours=asset.get('assets_id', ''),
+                value_extra_hours=asset.get('value_extra_hours', ''),
+                nf_rem=asset.get('nf_rem', ''),
+                dt_rem=asset.get('det_rem', ''),
+                nf_ret=asset.get('nf_ret', ''),
+                dt_ret=asset.get('dt_ret', ''),
+                vr_day_loc=asset.get('vr_day_loc', ''),
+                description=asset.get('description', '')
+            )
+            print("Assets Follow Up: ", assets)
+            session.merge(assets)
+            session.commit()
+
+        return jsonify(success=True)
+
+    except Exception as e:
+        session.rollback()
+        print(f"Error: {e}")
+        return jsonify(success=False, error=str(e))
+
+    finally:
+        session.close()
+
+
+def buscar_assets_follow_up(contract_id):
+    session = create_session()
+
+    try:
+        assets = session.query(AssetsFollowUp).filter_by(contract_id=contract_id).all()
+
+        follow_up_dict = {
+            'assets': [
+                {
+                    'follow_up_id': asset.id, 'assets_id': asset.assets_id, 'contract_id': asset.contract_id,
+                    'dt_start': asset.dt_start, 'dt_end': asset.dt_end, 'diesel_sent': asset.diesel_sent,
+                    'diesel_used': asset.diesel_used, 'desel_returned': asset.diesel_returned,
+                    'franchise': asset.franchise, 'initial_horimeter': asset.initial_horimeter,
+                    'final_horimeter': asset.final_horimeter, 'total_hours': asset.total_hours,
+                    'extra_hours': asset.extra_hours, 'value_extra_hours': asset.value_extra_hours,
+                    'nf_rem': asset.nf_rem, 'dt_rem': asset.dt_rem, 'nf_ret': asset.nf_ret, 'dt_ret': asset.dt_ret,
+                    'vr_day_loc': asset.vr_day_loc, 'description': asset.description
+                }
+                for asset in assets
+            ]
+        }
+        return [follow_up_dict]
+
+    except Exception as e:
+        print(f"Error: {e}")
+        return render_template('error.html', error_message=str(e))
+
+    finally:
+        session.close()

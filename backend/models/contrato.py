@@ -386,3 +386,279 @@ def contract_to_dict(contrato):
 
     finally:
         session.close()
+
+
+def buscar_contrato_por_proposta(proposal_id):
+    session = create_session()
+
+    try:
+        contrato = session.query(Contract).filter_by(proposal_id=proposal_id).first()
+        if contrato:
+            return contrato.contract_id, contrato.date_issue
+        return None
+
+    except Exception as e:
+        print(f"Erro ao buscar contrato por proposal_id: {e}")
+        return None
+
+    finally:
+        session.close()
+
+
+def add_custo_parada_sub(stop_cost_sub):
+    session = create_session()
+    try:
+        last_id = session.query(func.max(StopCostSub.stop_cost_sub_id)).scalar() or 0
+
+        for stop_cost in stop_cost_sub:
+            current_id = stop_cost.get('stop_cost_sub_id')
+            if current_id is None or current_id == "":
+                last_id += 1
+                current_id = last_id
+            sub = StopCostSub(
+                stop_cost_sub_id=current_id,
+                contract_id=stop_cost.get('contract_id', ''),
+                sub_description=stop_cost.get('sub_description', ''),
+                sub_supplier=stop_cost.get('sub_supplier', ''),
+                sub_note=stop_cost.get('sub_note', ''),
+                sub_initial_period=stop_cost.get('sub_initial_period', ''),
+                sub_final_period=stop_cost.get('sub_final_period', ''),
+                sub_rental_days=stop_cost.get('sub_rental_days', ''),
+                sub_daily_value=stop_cost.get('sub_daily_value', ''),
+                sub_value_machine=stop_cost.get('sub_value_machine', ''),
+                sub_value_accessory=stop_cost.get('sub_value_accessory', ''),
+                sub_total_value_machines=stop_cost.get('sub_total_value_machines', ''),
+                sub_total_value_accessories=stop_cost.get('sub_total_value_accessories', '')
+            )
+            print("Stop Cost Sub: ", sub)
+            session.merge(sub)
+            session.commit()
+
+        return jsonify(success=True)
+
+    except Exception as e:
+        session.rollback()
+        print(f"Error: {e}")
+        return jsonify(success=False, error=str(e))
+
+    finally:
+        session.close()
+
+
+def add_custo_parada_frete(stop_cost_freight):
+    session = create_session()
+    try:
+        if not isinstance(stop_cost_freight, list):
+            raise ValueError("Esperava-se uma lista de dados para frete")
+        last_id = session.query(func.max(StopCostFreight.stop_cost_freight_id)).scalar() or 0
+
+        for stop_cost in stop_cost_freight:
+            current_id = stop_cost.get('stop_cost_freight_id')
+            if current_id is None or current_id in ('', "None"):
+                last_id += 1
+                current_id = last_id
+            freight = StopCostFreight(
+                stop_cost_freight_id=current_id,
+                contract_id=stop_cost.get('contract_id', ''),
+                freight_day=stop_cost.get('freight_day', ''),
+                freight_driver=stop_cost.get('freight_driver', ''),
+                freight_finality=stop_cost.get('freight_finality', ''),
+                freight_own_third=stop_cost.get('freight_own_third', ''),
+                freight_initial_km=stop_cost.get('freight_initial_km', ''),
+                freight_final_km=stop_cost.get('freight_final_km', ''),
+                freight_total_km=stop_cost.get('freight_total_km', ''),
+                freight_cost_km=stop_cost.get('freight_cost_km', ''),
+                freight_value_third=stop_cost.get('freight_value_third', ''),
+                freight_value=stop_cost.get('freight_value', ''),
+                freight_total_value=stop_cost.get('freight_total_value', ''),
+                freight_total_value_third=stop_cost.get('freight_total_value_third', '')
+            )
+            print("Stop Cost Freight: ", freight)
+            session.merge(freight)
+            session.commit()
+
+        return jsonify(success=True)
+
+    except Exception as e:
+        session.rollback()
+        print(f"Error: {e}")
+        return jsonify(success=False, error=str(e))
+
+    finally:
+        session.close()
+
+
+def add_custo_parada_custo_operacional(stop_cost_op_cost):
+    session = create_session()
+    try:
+        last_id = session.query(func.max(StopCostOpCost.stop_cost_op_cost_id)).scalar() or 0
+
+        for stop_cost in stop_cost_op_cost:
+            current_id = stop_cost.get('stop_cost_op_cost_id')
+            if current_id is None or current_id == "":
+                last_id += 1
+                current_id = last_id
+            op_cost = StopCostOpCost(
+                stop_cost_op_cost_id=current_id,
+                contract_id=stop_cost.get('contract_id', ''),
+                op_cost_day=stop_cost.get('op_cost_day', ''),
+                op_cost_tec_driver=stop_cost.get('op_cost_tec_driver', ''),
+                op_cost_initial_hours=stop_cost.get('op_cost_initial_hours', ''),
+                op_cost_final_hours=stop_cost.get('op_cost_final_hours', ''),
+                op_cost_hours=stop_cost.get('op_cost_hours', ''),
+                op_cost_value_hours=stop_cost.get('op_cost_value_hours', ''),
+                op_cost_total_value_hours=stop_cost.get('op_cost_total_value_hours', ''),
+                op_cost_extra_hours=stop_cost.get('op_cost_extra_hours', ''),
+                op_cost_value_ex_hours=stop_cost.get('op_cost_value_ex_hours', ''),
+                op_cost_total_value_ex_hours=stop_cost.get('op_cost_total_value_ex_hours', ''),
+                op_cost_food_stay=stop_cost.get('op_cost_food_stay', ''),
+                op_cost_value=stop_cost.get('op_cost_value', ''),
+                op_cost_total_value=stop_cost.get('op_cost_total_value', ''),
+                op_cost_total_value_food_stay=stop_cost.get('op_cost_total_value_food_stay', '')
+            )
+            print("Stop Cost Op Cost: ", op_cost)
+            session.merge(op_cost)
+            session.commit()
+
+        return jsonify(success=True)
+
+    except Exception as e:
+        session.rollback()
+        print(f"Error: {e}")
+        return jsonify(success=False, error=str(e))
+
+    finally:
+        session.close()
+
+
+def buscar_custos_parada_por_id(contract_id):
+    session = create_session()
+
+    sub_alias = aliased(StopCostSub)
+    freight_alias = aliased(StopCostFreight)
+    op_cost_alias = aliased(StopCostOpCost)
+
+    try:
+        subs = session.query(sub_alias).filter_by(contract_id=contract_id).all()
+        freights = session.query(freight_alias).filter_by(contract_id=contract_id).all()
+        ops_cost = session.query(op_cost_alias).filter_by(contract_id=contract_id).all()
+
+        stop_cost_dict = {
+            'sub': [
+                {
+                    'stop_cost_sub_id': sub.stop_cost_sub_id, 'contract_id': contract_id,
+                    'sub_description': sub.sub_description, 'sub_supplier': sub.sub_supplier, 'sub_note': sub.sub_note,
+                    'sub_initial_period': sub.sub_initial_period, 'sub_final_period': sub.sub_final_period,
+                    'sub_rental_days': sub.sub_rental_days, 'sub_daily_value': sub.sub_daily_value,
+                    'sub_value_machine': sub.sub_value_machine, 'sub_value_accessory': sub.sub_value_accessory,
+                    'sub_total_value_machines': sub.sub_total_value_machines,
+                    'sub_total_value_accessories': sub.sub_total_value_accessories
+                }
+                for sub in subs
+            ],
+            'freight': [
+                {
+                    'stop_cost_freight_id': freight.stop_cost_freight_id, 'contract_id': contract_id,
+                    'freight_day': freight.freight_day, 'freight_driver': freight.freight_driver,
+                    'freight_finality': freight.freight_finality, 'freight_own_third': freight.freight_own_third,
+                    'freight_initial_km': freight.freight_initial_km, 'freight_final_km': freight.freight_final_km,
+                    'freight_total_km': freight.freight_total_km, 'freight_cost_km': freight.freight_cost_km,
+                    'freight_value_third': freight.freight_value_third, 'freight_value': freight.freight_value,
+                    'freight_total_value': freight.freight_total_value,
+                    'freight_total_value_third': freight.freight_total_value_third
+                }
+                for freight in freights
+            ],
+            'op_cost': [
+                {
+                    'stop_cost_op_cost_id': op_cost.stop_cost_op_cost_id, 'contract_id': contract_id,
+                    'op_cost_day': op_cost.op_cost_day, 'op_cost_tec_driver': op_cost.op_cost_tec_driver,
+                    'op_cost_initial_hours': op_cost.op_cost_initial_hours,
+                    'op_cost_final_hours': op_cost.op_cost_final_hours, 'op_cost_hours': op_cost.op_cost_hours,
+                    'op_cost_value_hours': op_cost.op_cost_value_hours,
+                    'op_cost_total_value_hours': op_cost.op_cost_total_value_hours,
+                    'op_cost_extra_hours': op_cost.op_cost_extra_hours,
+                    'op_cost_value_ex_hours': op_cost.op_cost_value_ex_hours,
+                    'op_cost_total_value_ex_hours': op_cost.op_cost_total_value_ex_hours,
+                    'op_cost_food_stay': op_cost.op_cost_food_stay, 'op_cost_value': op_cost.op_cost_value,
+                    'op_cost_total_value': op_cost.op_cost_total_value,
+                    'op_cost_total_value_food_stay': op_cost.op_cost_total_value_food_stay
+                }
+                for op_cost in ops_cost
+            ]
+        }
+        return [stop_cost_dict]
+
+    except Exception as e:
+        print(f"Error: {e}")
+        return render_template('error.html', error_message=str(e))
+
+    finally:
+        session.close()
+
+
+def add_dados_fatura_follow_up(invoice_follow_up):
+    session = create_session()
+    try:
+        if not isinstance(invoice_follow_up, list):
+            raise ValueError("Esperava-se uma lista de dados para Invoice Follow Up")
+
+        last_invoice_id = session.query(func.max(FollowUpInvoice)).scalar() or 0
+
+        for invoice in invoice_follow_up:
+            current_id = invoice.get('invoice_id')
+            if current_id is None or current_id in ('', "None"):
+                last_invoice_id += 1
+                current_id = last_invoice_id
+            invoices = FollowUpInvoice(
+                invoice_id=current_id,
+                contract_id=invoice.get('contract_id', ''),
+                number_invoice=invoice.get('number_invoice', ''),
+                contract_value=invoice.get('contract_value', ''),
+                invoice_description=invoice.get('invoice_description', ''),
+                invoice_value=invoice.get('invoice_value', ''),
+                initial_period=invoice.get('initial_period', ''),
+                final_period=invoice.get('final_period', ''),
+                invoice_days=invoice.get('invoice_days', ''),
+                invoice_venc_date=invoice.get('invoice_venc_date', ''),
+            )
+            print("Invoice Follow Up: ", invoices)
+            session.merge(invoices)
+            session.commit()
+
+        return jsonify(success=True)
+
+    except Exception as e:
+        session.rollback()
+        print(f"Error: {e}")
+        return jsonify(success=False, error=str(e))
+
+    finally:
+        session.close()
+
+
+def buscar_dados_fatura_follow_up(contract_id):
+    session = create_session()
+    try:
+        invoices = session.query(FollowUpInvoice).filter_by(contract_id=contract_id).all()
+
+        invoice_dict = {
+            'invoices': [
+                {
+                    'invoice_id': invoice.invoice_id, 'contract_id': invoice.contract_id,
+                    'number_invoice': invoice.number_invoice, 'contract_value': invoice.contract_value,
+                    'invoice_description': invoice.invoice_description, 'invoice_value': invoice.invoice_value,
+                    'initial_period': invoice.initial_period, 'final_period': invoice.final_period,
+                    'invoice_days': invoice.invoice_days, 'invoice_venc_date': invoice.invoice_venc_date
+                }
+                for invoice in invoices
+            ]
+        }
+        return [invoice_dict]
+
+    except Exception as e:
+        print(f"Error: {e}")
+        return render_template('error.html', error_message=str(e))
+
+    finally:
+        session.close()

@@ -163,6 +163,11 @@ class Contract(Base):
     proposal = relationship('Proposal', back_populates='contract')
     products_contract = relationship('ContractProducts', back_populates='contract')
     refunds_contract = relationship('ContractRefund', back_populates='contract')
+    stop_cost_sub = relationship('StopCostSub', back_populates='contract')
+    stop_cost_freight = relationship('StopCostFreight', back_populates='contract')
+    stop_cost_op_cost = relationship('StopCostOpCost', back_populates='contract')
+    rental_invoice = relationship('RentalInvoice', back_populates='contract')
+    assets_follow_up = relationship('AssetsFollowUp', back_populates='contract')
 
 
 class ContractProducts(Base):
@@ -337,6 +342,7 @@ class Assets(Base):
     accumulated_meter = Column(Integer)
     meter_limit = Column(Integer)
     date_followup = Column(Date)
+    cod = Column(String)
 
     cost_center = relationship('CostCenter', back_populates='assets')
     assets_manufacturer = relationship(
@@ -348,6 +354,116 @@ class Assets(Base):
     model_type = relationship('ModelType', back_populates='assets')
     assets_family = relationship('AssetsFamily', back_populates='assets')
     product = relationship('Product', back_populates='assets')
+    assets_follow_up = relationship('AssetsFollowUp', back_populates='assets')
+
+
+class AssetsFollowUp(Base):
+    __tablename__ = 'assets_follow_up'
+
+    id = Column(Integer, primary_key=True)
+    assets_id = Column(Integer, ForeignKey('assets.id'))
+    contract_id = Column(Integer, ForeignKey('contract.contract_id'))
+    dt_start = Column(Date)
+    dt_end = Column(Date)
+    diesel_sent = Column(Integer)
+    diesel_used = Column(Integer)
+    diesel_returned = Column(Integer)
+    franchise = Column(Integer)
+    initial_horimeter = Column(Integer)
+    final_horimeter = Column(Integer)
+    total_hours = Column(Integer)
+    extra_hours = Column(Integer)
+    value_extra_hours = Column(String)
+    nf_rem = Column(String)
+    dt_rem = Column(Date)
+    nf_ret = Column(String)
+    dt_ret = Column(Date)
+    vr_day_loc = Column(String)
+    description = Column(String)
+
+    assets = relationship('Assets', back_populates='assets_follow_up')
+    contract = relationship('Assets', back_populates='assets_follow_up')
+
+
+class StopCostSub(Base):
+    __tablename__ = 'stop_cost_sub'
+
+    stop_cost_sub_id = Column(Integer, primary_key=True)
+    contract_id = Column(Integer, ForeignKey('contract.contract_id'))
+    sub_description = Column(String)
+    sub_supplier = Column(String)
+    sub_note = Column(String)
+    sub_initial_period = Column(Date)
+    sub_final_period = Column(Date)
+    sub_rental_days = Column(Integer)
+    sub_daily_value = Column(String)
+    sub_value_machine = Column(String)
+    sub_value_accessory = Column(String)
+    sub_total_value_machines = Column(String)
+    sub_total_value_accessories = Column(String)
+
+    contract = relationship('Contract', back_populates='stop_cost_sub')
+
+
+class StopCostFreight(Base):
+    __tablename__ = 'stop_cost_freight'
+
+    stop_cost_freight_id = Column(Integer, primary_key=True)
+    contract_id = Column(Integer, ForeignKey('contract.contract_id'))
+    freight_day = Column(Date)
+    freight_driver = Column(String)
+    freight_finality = Column(String)
+    freight_own_third = Column(String)
+    freight_initial_km = Column(Integer)
+    freight_final_km = Column(Integer)
+    freight_total_km = Column(Integer)
+    freight_cost_km = Column(String)
+    freight_value_third = Column(String)
+    freight_value = Column(String)
+    freight_total_value = Column(String)
+    freight_total_value_third = Column(String)
+
+    contract = relationship('Contract', back_populates='stop_cost_freight')
+
+
+class StopCostOpCost(Base):
+    __tablename__ = 'stop_cost_op_cost'
+
+    stop_cost_op_cost_id = Column(Integer, primary_key=True)
+    contract_id = Column(Integer, ForeignKey('contract.contract_id'))
+    op_cost_day = Column(Date)
+    op_cost_tec_driver = Column(String)
+    op_cost_initial_hours = Column(String)
+    op_cost_final_hours = Column(String)
+    op_cost_hours = Column(String)
+    op_cost_value_hours = Column(String)
+    op_cost_total_value_hours = Column(String)
+    op_cost_extra_hours = Column(String)
+    op_cost_value_ex_hours = Column(String)
+    op_cost_total_value_ex_hours = Column(String)
+    op_cost_food_stay = Column(String)
+    op_cost_value = Column(String)
+    op_cost_total_value = Column(String)
+    op_cost_total_value_food_stay = Column(String)
+
+    contract = relationship('Contract', back_populates='stop_cost_op_cost')
+
+
+class FollowUpInvoice(Base):
+    __tablename__ = 'rental_invoce'
+
+    invoice_id = Column(Integer, primary_key=True)
+    contract_id = Column(Integer, ForeignKey('contract.contract_id'))
+    number_invoice = Column(String)
+    contract_value = Column(String)
+    invoice_description = Column(String)
+    invoice_value = Column(String)
+    initial_period = Column(Date)
+    final_period = Column(Date)
+    invoice_days = Column(Integer)
+    invoice_venc_date = Column(Date)
+
+    contract = relationship('Contract', back_populates='rental_invoice')
 
 
 # esquema que gera automaticamente campos a partir das colunas de um modelo ou tabela SQLAlchemy

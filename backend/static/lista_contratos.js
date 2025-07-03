@@ -5,6 +5,7 @@ document.querySelectorAll('.contrato').forEach(item => {
         document.getElementById('visualizar').disabled = false;
         document.getElementById('alterar').disabled = false;
         document.getElementById('imprimir').disabled = false;
+        document.getElementById('custos_parada').disabled = false
 
         const contractId = this.getAttribute('data-contract-id').split('/')[0];
         const proposalElement = document.getElementById('proposal-id');
@@ -19,6 +20,9 @@ document.querySelectorAll('.contrato').forEach(item => {
         };
         document.getElementById('imprimir').onclick = function() {
             window.location.href = '/contrato/imprimir/' + contractId + '/' + proposalId;
+        };
+        document.getElementById('custos_parada').onclick = function() {
+            window.location.href = '/custos_parada/' + contractId + '/' + proposalId;
         };
     });
 });

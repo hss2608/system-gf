@@ -197,8 +197,11 @@ def add_services(proposal_id, services):
 def add_accessories(proposal_id, accessories):
     session = create_session()
     try:
-        accessories_id = gerar_accessory_id()
+        max_id = session.query(func.max(Accessories.accessories_id)).scalar()
+        accessories_id = max_id if max_id else 0
         for accessory in accessories:
+            accessories_id += 1
+
             proposal_accessories = Accessories(
                 proposal_id=proposal_id,
                 accessories_id=accessories_id,
@@ -232,24 +235,6 @@ def proposal_number():
         logging.debug(f"Last Proposal Id: {last_id}")
         current_id = last_id + 1
         logging.debug(f"Current Id: {current_id}")
-        session.close()
-        return current_id
-
-    except Exception as e:
-        print(f"Error: {e}")
-        # linha extra abaixo para tratar o erro JSON serializable
-        return jsonify(success=False, error=str(e))
-
-
-def gerar_accessory_id():
-    try:
-        session = create_session()
-
-        max_id = session.query(func.max(Accessories.accessories_id)).scalar()
-        last_id = max_id if max_id else 0
-        logging.debug(f"Last Accessory Id: {last_id}")
-        current_id = last_id + 1
-        logging.debug(f"Current Accessory Id: {current_id}")
         session.close()
         return current_id
 

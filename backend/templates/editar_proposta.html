@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar Proposta</title>
+    <script src="https://cdn.tiny.cloud/1/8wtxfoo5se51jl9zmlz4obivgwepjmxh88vtkopcqk3iuntr/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='editar_proposta.css') }}">
 </head>
@@ -122,12 +123,6 @@
                     </div>
                 </div><br>
                 <div>
-                    <label for="observations">OBSERVAÇÕES:</label>
-                    <textarea name="observations" id="observations" maxlength="200" rows="4" cols="50" placeholder="Observacoes...">
-                        {{ proposta['proposta'].observations }}
-                    </textarea>
-                </div><br>
-                <div>
                     <label for="oenf_obs">OBSERVACOES DA OENF:</label>
                     <textarea name="oenf_obs" id="oenf_obs" maxlength="200" rows="4" cols="50" placeholder="Observacoes da OENF...">
                         {{ proposta['proposta'].oenf_obs }}
@@ -154,10 +149,13 @@
                             <th>COD</th>
                             <th class="wide-column">DESCRIÇÃO</th>
                             <th>QTDE</th>
+                            <th>VOLTAGEM (V)</th>
+                            <th>HRS FRANQUIA</th>
                             <th class="wide-column">R$ UNIT</th>
+                            <th>DESC.%</th>
                             <th class="wide-column">R$</th>
                             <th>VAL HR EXTRAS</th>
-                            <th>HRS FRANQUIA</th>
+
                             <th class="wide-column2"></th>
                         </tr>
                     </thead>
@@ -168,11 +166,14 @@
                                     <td class="product_id_placeholder">{{ item['product_id'] or product_data.product_id or '' }}</td>
                                     <td class="product_code_placeholder">{{ item['product_code'] or product_data.product_code or '' }}</td>
                                     <td class="description_placeholder">{{ item['description'] or product_data.description or '' }}</td>
-                                    <td class="quantity_placeholder">{{ item['quantity'] or '' }}</td>
-                                    <td class="unit_price_placeholder">{{ item['unit_price'] or '' }}</td>
+                                    <td><input type="number" class="quantity_input" value="{{ item['quantity'] or '' }}"></td>
+                                    <td><input type="text" class="volts_input" value="{{ item['volts'] or '' }}"></td>
+                                    <td><input type="text" class="rental_hours_input" value="{{ item['rental_hours'] or '' }}"></td>
+                                    <td><input type="text" class="unit_price_input" value="{{ item['unit_price'] or '' }}"></td>
+                                    <td><input type="text" class="discount_input" value="{{ item['discount'] or '' }}"></td>
                                     <td class="price_placeholder">{{ item['price'] or '' }}</td>
-                                    <td class="extra_hours_placeholder">{{ item['extra_hours'] or '' }}</td>
-                                    <td class="rental_hours_placeholder">{{ item['rental_hours'] or '' }}</td>
+                                    <td><input type="text" class="extra_hours_input" value="{{ item['extra_hours'] or '' }}"></td>
+
                                     <td><button class="codigos_excluir" onclick="removeProduct(this.parentNode.parentNode)">Excluir</button></td>
                                 </tr>
                             {% endfor %}
@@ -200,6 +201,8 @@
                             <th class="wide-column">DESCRIÇÃO</th>
                             <th class="wide-column2">QTDE</th>
                             <th class="wide-column3">R$ UNIT</th>
+                            <th class="wide-column3">DESC.%</th>
+                            <th class="wide-column3">KM</th>
                             <th class="wide-column">R$</th>
                             <th class="wide-column2"></th>
                         </tr>
@@ -210,10 +213,61 @@
                                 <tr>
                                     <td class="cod_placeholder">{{ service['cod'] or service_data.cod or '' }}</td>
                                     <td class="descript_placeholder">{{ service['descript'] or service_data.descript or '' }}</td>
-                                    <td class="service_quantity_placeholder">{{ service['service_quantity'] or '' }}</td>
-                                    <td class="service_unit_price_placeholder">{{ service['service_unit_price'] or '' }}</td>
+                                    <td><input type="number" class="service_quantity_input" value="{{ service['service_quantity'] or '' }}"></td>
+                                    <td><input type="text" class="service_unit_price_input" value="{{ service['service_unit_price'] or '' }}"></td>
+                                    <td><input type="text" class="discount_service_input" value="{{ service['discount_service'] or '' }}"></td>
+                                    <td><input type="text" class="km_input" value="{{ service['km'] or '' }}"></td>
                                     <td class="service_price_placeholder">{{ service['service_price'] or '' }}</td>
                                     <td><button class="codigos_excluir" onclick="removeService(this.parentNode.parentNode)">Excluir</button></td>
+                                </tr>
+                            {% endfor %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="manual-accessory-add" style="margin-bottom: 10px;">
+            <label for="manualAccessorySelect"><strong>Adicionar Acessório Manual:</strong></label>
+            <select id="manualAccessorySelect">
+                <option value="">Selecione um acessório</option>
+            </select>
+            <button type="button" onclick="addManualAccessory()">Adicionar</button>
+        </div>
+
+        <div class="form-section">
+            <h3>Acessórios</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="wide-column">DESCRIÇÃO</th>
+                            <th>QTDE/Fase</th>
+                            <th>METROS</th>
+                            <th>R$ UNIT</th>
+                            <th>DIAS COBRADOS</th>
+                            <th>ITEM/MTS</th>
+                            <th>DESC.%</th>
+                            <th>R$</th>
+                            <th class="wide-column2"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="accessories_table_body">
+                        {% for proposta in proposal_data %}
+                            {% for accessory in proposta['accessories'] %}
+                                <tr data-accessory-id="{{ accessory['accessories_id'] or '' }}">
+                                    <td style="display:none;">
+                                        <input type="hidden" class="accessories_id_input" value="{{ accessory['accessories_id'] or '' }}">
+                                    </td>
+                                    <td class="accessories_description_placeholder">{{ accessory['accessories_description'] or '' }}</td>
+                                    <td><input type="text" class="accessories_quantity_input" value="{{ accessory['accessories_quantity'] or ''}}"></td>
+                                    <td><input type="number" class="meters_input" value="{{ accessory['meters'] or ''}}"></td>
+                                    <td><input type="text" class="accessories_unit_price_input" value="{{ accessory['accessories_unit_price'] or ''}}"></td>
+                                    <td><input type="text" class="accessories_days_input" value="{{ accessory['accessories_days'] or ''}}"></td>
+                                    <td><input type="text" class="items_meters_input" value="{{ accessory['items_meters'] or ''}}"></td>
+                                    <td><input type="text" class="accessories_discount_input" value="{{ accessory['accessories_discount'] or '0%'}}"></td>
+                                    <td class="accessories_price_placeholder">{{ accessory['accessories_price'] or '' }}</td>
+                                    <td><button class="codigos_excluir" onclick="removeAccessory(this.parentNode.parentNode)">Excluir</button></td>
                                 </tr>
                             {% endfor %}
                         {% endfor %}
@@ -233,9 +287,19 @@
             </div>
         </div>
 
+        <div>
+            <label for="observations">OBSERVAÇÕES:</label>
+            <textarea name="observations" id="observations" placeholder="Observacoes..."></textarea>
+        </div>
+
         <input type="submit" value="Salvar Alterações">
         <a href="/lista_propostas">↩ Voltar</a>
 
+        <script>
+            const proposta = {
+                observations: `{{ proposal_data[0]['proposta'].observations | tojson | safe }}`
+            };
+        </script>
         <script src="{{ url_for('static', filename='editar_proposta.js') }}"></script>
     </form>
 </body>

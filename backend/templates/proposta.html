@@ -11,7 +11,7 @@
 </head>
 <body>
     <h2>Proposta Comercial</h2>
-    <form method="POST" action="{{ url_for('proposta') }}" id="proposal-form">
+    <form id="proposal-form">
 
         <!-- Informações da Proposta  -->
         <div class="form-section">
@@ -280,7 +280,7 @@
             <textarea name="observations" id="observations" placeholder="Digite as observações da proposta aqui..."></textarea>
         </div>
 
-        <button class="submit" type="submit">CONFIRMAR</button><br>
+        <button id="submit-button" type="button" onclick="submitProposal()">Salvar Proposta</button><br>
 
         <a href="/lista_propostas">↩ Voltar</a>
 

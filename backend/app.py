@@ -2,10 +2,11 @@ from flask import Flask, render_template, request, jsonify, send_file, flash, re
 from backend.models.cadastro import Cadastro
 from backend.models.proposta import (buscar_clientes, buscar_produtos, buscar_servicos, proposta_comercial,
                                      proposal_number, add_products, add_services, buscar_cond_pagamentos,
-                                     add_accessories, gerar_accessory_id)
+                                     add_accessories)
 from backend.models.contrato import (Contrato, criar_contrato, contract_number, buscar_clientes_proposta,
                                      listar_todos_contratos, buscar_contrato_por_id, atualizar_contrato,
-                                     contract_to_dict)
+                                     contract_to_dict, add_custo_parada_sub, add_custo_parada_frete,
+                                     add_custo_parada_custo_operacional, buscar_custos_parada_por_id)
 from backend.models.lista_clientes import listar_todos_clientes, buscar_cliente_por_id, atualizar_cliente
 from backend.models.lista_propostas import (listar_todas_propostas, buscar_proposta_por_id, atualizar_proposta,
                                             proposal_to_dict)
@@ -17,7 +18,7 @@ from backend.models.familia_bens import criar_familias, listar_todas_familias, b
 from backend.models.grupo_kva import criar_kva_group, listar_todos_grupo_kva, buscar_grupo_por_id
 from backend.models.fabricantes import criar_fabricante, listar_todos_fabricantes, buscar_fabricantes_por_id
 from backend.models.tipo_modelos_bens import criar_tipo_modelo, listar_todos_modelos, buscar_modelo_por_id
-from backend.models.bens import assets, buscar_familia_bens, buscar_fabricantes, buscar_tipo_modelo, buscar_centro_custo
+from backend.models.bens import buscar_assets, buscar_familia_bens, buscar_fabricantes, buscar_tipo_modelo, buscar_centro_custo
 import traceback
 import logging
 import json
@@ -43,58 +44,11 @@ def cadastro_route():
 @app.route('/proposta', methods=['GET', 'POST'])
 def proposta():
     try:
-        client_data = {}
-        product_data = {}
-        service_data = {}
-        accessories_data = {}
-        success_message = None
-        error_message = None
-
-        if request.method == 'POST':
-            form_data = {
-                'proposal_id': request.form['proposal_id'],
-                'client_id': request.form['client_id'],
-                'company': request.form['company'],
-                'cpf_cnpj': request.form['cpf_cnpj'],
-                'contact_name': request.form['contact_name'],
-                'phone': request.form['phone'],
-                'email': request.form['email'],
-                'number_store': request.form['number_store'],
-                'status': request.form['status'],
-                'delivery_address': request.form['delivery_address'],
-                'delivery_bairro': request.form['delivery_bairro'],
-                'delivery_municipio': request.form['delivery_municipio'],
-                'delivery_cep': request.form['delivery_cep'],
-                'delivery_uf': request.form['delivery_uf'],
-                'delivery_date': request.form['delivery_date'],
-                'withdrawal_date': request.form['withdrawal_date'],
-                'start_date': request.form['start_date'],
-                'end_date': request.form['end_date'],
-                'period_days': request.form['period_days'],
-                'validity': request.form['validity'],
-                'observations': request.form['observations'],
-                'oenf_obs': request.form['oenf_obs'],
-                'value': request.form['value'],
-                'payment_condition': request.form['payment_condition']
-            }
-
-            client_data = json.loads(request.form.get('client_data', '{}'))
-            product_data = json.loads(request.form.get('product_data', '{}'))
-            service_data = json.loads(request.form.get('service_data', '{}'))
-            accessories_data = json.loads(request.form.get('accessories_data', '{}'))
-
-            print(request.method)
-            data = request.form
-            app.logger.info('Response data: %s', data)
-            result = proposta_comercial(form_data)
-            if isinstance(result, dict) and result.get('success'):
-                success_message = "Proposal submitted successfully!"
-            else:
-                error_message = "Failed to submit proposal form. Please try again."
-
+        client_data = json.loads(request.form.get('client_data', '{}'))
+        product_data = json.loads(request.form.get('product_data', '{}'))
+        service_data = json.loads(request.form.get('service_data', '{}'))
         return render_template('proposta.html', client_data=client_data, product_data=product_data,
-                               service_data=service_data, accessories_data=accessories_data,
-                               success_message=success_message, error_message=error_message)
+                               service_data=service_data)
 
     except Exception as e:
         error_message = str(e)
@@ -114,6 +68,7 @@ def submit_proposal():
         proposal_id = response.json['proposal_id']
 
         products_response = add_products(proposal_id, data['products'])
+        print("Products response :", products_response)
         if not products_response.json['success']:
             return products_response
 
@@ -122,9 +77,10 @@ def submit_proposal():
             return services_response
 
         accessories_response = add_accessories(proposal_id, data['accessories'])
+        print("Accessories response :", accessories_response)
         if not accessories_response.json['success']:
             return accessories_response
-
+        return jsonify(success=True, message="Proposta salva com sucesso!")
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
@@ -271,44 +227,29 @@ def visualizar_proposta(proposal_id):
 
 @app.route('/proposta/alterar/<int:proposal_id>', methods=['GET', 'POST'])
 def editar_proposta(proposal_id):
-    proposal_data = buscar_proposta_por_id(proposal_id)
-    print("Proposal Data", proposal_data)
-    if not proposal_data:
-        return render_template('error.html', message="Proposta não encontrada.")
+    try:
+        proposal_data = buscar_proposta_por_id(proposal_id)
+        print("Proposal Data", proposal_data)
+        if not proposal_data:
+            return render_template('error.html', message="Proposta não encontrada.")
 
-    status_proposta = proposal_data[0]['proposta']['status']
-    print("Status:", status_proposta)
+        status_proposta = proposal_data[0]['proposta']['status']
+        print("Status:", status_proposta)
 
-    print("Proposal ID:", proposal_id)
+        print("Proposal ID:", proposal_id)
 
-    if status_proposta in ['Aprovada', 'Reprovada']:
-        flash(f"A proposta {proposal_data[0]['proposta']['proposal_id']} já foi {status_proposta.lower()} e não pode ser alterada.")
-        return redirect(f'/proposta/visualizar/{proposal_id}')
+        if status_proposta in ['Aprovada', 'Reprovada']:
+            flash(f"A proposta {proposal_data[0]['proposta']['proposal_id']} já foi {status_proposta.lower()} e não pode ser alterada.")
+            return redirect(f'/proposta/visualizar/{proposal_id}')
 
-    if request.method == 'POST':
-        dados_atualizados = {
-            'status': request.form['status'],
-            'observations': request.form['observations'],
-            'oenf_obs': request.form['oenf_obs'],
-            'product_id': request.form['product_id'],
-            'product_code': request.form['product_code'],
-            'quantity': request.form['quantity'],
-            'unit_price': request.form['unit_price'],
-            'price': request.form['price'],
-            'extra_hours': request.form['extra_hours'],
-            'rental_hours': request.form['rental_hours'],
-            'discount': request.form['discount'],
-            'cod': request.form['cod'],
-            'service_quantity': request.form['service_quantity'],
-            'service_unit_price': request.form['service_unit_price'],
-            'service_price': request.form['service_price'],
-            'value': request.form['value']
-        }
-        atualizar_proposta(proposal_id, dados_atualizados)
-        propostas = listar_todas_propostas()
-        return render_template('lista_propostas.html', propostas=propostas)
+        return render_template('editar_proposta.html', proposal_data=proposal_data)
 
-    return render_template('editar_proposta.html', proposal_data=proposal_data)
+    except Exception as e:
+        error_message = str(e)
+        traceback_info = traceback.format_exc()
+        print(f"Error: {error_message}")
+        print(f"Traceback: {traceback_info}")
+        return render_template('error.html', error=error_message)
 
 
 @app.route('/submit_edit_proposal', methods=['POST'])
@@ -326,26 +267,11 @@ def submit_edit_proposal():
                     "contrato": contrato_response
                 })
             except Exception as contract_error:
-                logging.error(f"Erro ao criar o pedido: {contract_error}", exc_info=True)
+                logging.error(f"Erro ao criar o contrato: {contract_error}", exc_info=True)
                 responses.append({
                     "success": False,
                     "message": f"Erro ao preparar o contrato: {str(contract_error)}."
                 })
-
-            try:
-                pedido_response = criar_pedido(proposal_data['proposal_id'], sales_order_number())
-                responses.append({
-                    "success": True,
-                    "message": "Pedido de venda criado com sucesso.",
-                    "pedido": pedido_response
-                })
-            except Exception as pedido_error:
-                logging.error(f"Erro ao criar o pedido: {pedido_error}", exc_info=True)
-                responses.append({
-                    "success": False,
-                    "message": f"Erro ao preparar o contrato: {str(pedido_error)}."
-                })
-
             return jsonify({"success": True, "tarefas": responses}), 200
 
         return jsonify({"success": True, "message": "Proposta atualizada com sucesso."}), 200
@@ -371,10 +297,7 @@ def gerar_pdf_proposta(proposal_id):
 @app.route('/pedido/imprimir/<int:proposal_id>')
 def gerar_pdf_pedido(proposal_id):
     proposal_data = buscar_proposta_por_id(proposal_id)
-    pedido_data = buscar_pedido_por_id(proposal_id)
-    order_id = pedido_data['order_id']
-    print('Pedido data:', pedido_data)
-    pdf_buffer = gerar_pdf_pedido_venda(order_id, proposal_data)
+    pdf_buffer = gerar_pdf_pedido_venda(proposal_data)
     return send_file(pdf_buffer, as_attachment=True, download_name=f'pedido.pdf', mimetype='application/pdf')
 
 
@@ -490,6 +413,43 @@ def gerar_pdf_contrato_geraforca(contract_id, proposal_id):
 
     return send_file(pdf_buffer, as_attachment=True, download_name=f'contrato_{contract_id}.pdf',
                      mimetype='application/pdf')
+
+
+@app.route('/custos_parada/<int:contract_id>/<int:proposal_id>', methods=['GET'])
+def editar_custos_parada(contract_id, proposal_id):
+    custos_parada_data = buscar_custos_parada_por_id(contract_id)
+    contrato_data = buscar_contrato_por_id(contract_id, proposal_id)
+
+    return render_template('custos_parada.html', custos_parada_data=custos_parada_data,
+                           contrato_data=contrato_data, contract_id=contract_id)
+
+
+@app.route('/submit_stop_cost', methods=['POST'])
+def submit_stop_cost():
+    try:
+        data = request.get_json()
+        # contract_id = data['contract_id']
+
+        print("Data sub: ", data['sub'])
+        print("Data freight: ", data['freight'])
+        print("Data Op Cost: ", data['op_cost'])
+
+        sub_response = add_custo_parada_sub(data['sub'])
+        if not sub_response.json['success']:
+            return sub_response
+
+        freight_response = add_custo_parada_frete(data['freight'])
+        if not freight_response.json['success']:
+            return freight_response
+
+        op_cost_response = add_custo_parada_custo_operacional(data['op_cost'])
+        if not op_cost_response.json['success']:
+            return op_cost_response
+
+        return jsonify(success=True)
+
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 
 @app.route('/bens/familia', methods=['GET', 'POST'])

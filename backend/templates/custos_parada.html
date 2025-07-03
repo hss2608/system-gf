@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custos Parada</title>
+    <script src="https://cdn.tiny.cloud/1/8wtxfoo5se51jl9zmlz4obivgwepjmxh88vtkopcqk3iuntr/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='custos_parada.css') }}">
+</head>
+<body>
+
+    <h2>Custos Parada</h2>
+    <form method="POST" id="stop_cost_sub_form">
+        <div class="btn-container">
+            <button type="submit" class="btn-confirm">Confirmar</button>
+            <button type="button" class="btn-cancel" onclick="window.history.back()">Cancelar</button>
+        </div>
+        <div class="form-section">
+            <h3>Sub-Locação de Maquinas e Acessorios sub-locadas</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="sub-desc">Descrição</th>
+                            <th class="sub-supplier">Fornecedor</th>
+                            <th class="sub-note">Nota</th>
+                            <th class="sub-period">Período Inicial</th>
+                            <th class="sub-period">Período Final</th>
+                            <th class="sub-days">Dias Loc</th>
+                            <th class="sub-daily">Vlr Diário</th>
+                            <th class="sub-value">R$ Maquinas</th>
+                            <th class="sub-accessory">R$ Acessorios</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sub_body">
+                        {% set subs = custos_parada_data[0]['sub'] if custos_parada_data and custos_parada_data[0]['sub'] else [] %}
+                        {% for i in range(6) %}
+                            <tr>
+                                {% set sub = subs[i] if i < subs|length else {} %}
+                                <input type="hidden" class="sub-id-input" name="stop_cost_sub_id" value="{{ sub.get('stop_cost_sub_id') }}">
+                                <input type="hidden" class="contract-id-input" name="contract_id" value="{{ sub.get('contract_id', contract_id) }}">
+                                <td><div contenteditable="true" class="editable-cell">{{ sub.get('sub_description', '') }}</div></td>
+                                <td><div contenteditable="true" class="editable-cell">{{ sub.get('sub_supplier', '') }}</div></td>
+                                <td><div contenteditable="true" class="editable-cell">{{ sub.get('sub_note', '') }}</div></td>
+                                <td><div contenteditable="true" class="editable-cell">{{ sub.get('sub_initial_period', '') }}</div></td>
+                                <td><div contenteditable="true" class="editable-cell">{{ sub.get('sub_final_period', '') }}</div></td>
+                                <td><div contenteditable="true" class="editable-cell">{{ sub.get('sub_rental_days', '') }}</div></td>
+                                <td><div contenteditable="true" class="editable-cell">{{ sub.get('sub_daily_value', '') }}</div></td>
+                                <td><div contenteditable="true" class="editable-cell">{{ sub.get('sub_value_machine', '') }}</div></td>
+                                <td><div contenteditable="true" class="editable-cell">{{ sub.get('sub_value_accessory', '') }}</div></td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="form-grid">
+                <div>
+                    <label for="sub_total_value_machines">R$ Total Maquinas</label>
+                    <input type="text" id="sub_total_value_machines" name="sub_total_value_machines" readonly>
+                </div>
+                <div>
+                    <label for="sub_total_value_accessories">R$ Total Acessórios</label>
+                    <input type="text" id="sub_total_value_accessories" name="sub_total_value_accessories" readonly>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3>Custeio de frete / deslocamento</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="freight-day">Dia</th>
+                            <th class="freight-driver">Motorista</th>
+                            <th class="freight-finality">Finalidade</th>
+                            <th class="freight-own-third">Proprio / Terceiro</th>
+                            <th class="freight-km">Km inicial</th>
+                            <th class="freight-km">Km final</th>
+                            <th class="freight-km">Km total</th>
+                            <th class="freight-km">Custo / Km</th>
+                            <th class="freight-value">Terceiro</th>
+                            <th class="freight-value">R$ Frete</th>
+                        </tr>
+                    </thead>
+                    <tbody id="freight_body">
+                        {% set freights = custos_parada_data[0]['freight'] if custos_parada_data and custos_parada_data[0]['freight'] else [] %}
+                        {% for i in range(4) %}
+                            <tr>
+                                {% set freight = freights[i] if i < freights|length else {} %}
+                                <input type="hidden" class="freight-id-input" name="stop_cost_freight_id" value="{{ freight.get('stop_cost_freight_id') }}">
+                                <input type="hidden" class="contract-id-input" name="contract_id" value="{{ freight.get('contract_id', contract_id) }}">
+                                <td><div contenteditable="true" class="editable-cell">{{ freight.get('freight_day', '') }}</div></td>
+                                <td><div contenteditable="true" class="editable-cell">{{ freight.get('freight_driver', '') }}</div></td>
+                                <td><div contenteditable="true" class="editable-cell">{{ freight.get('freight_finality', '') }}</div></td>
+                                <td><div contenteditable="true" class="editable-cell">{{ freight.get('freight_own_third', '') }}</div></td>
+                                <td><div contenteditable="true" class="editable-cell">{{ freight.get('freight_initial_km', '') }}</div></td>
+                                <td><div contenteditable="true" class="editable-cell">{{ freight.get('freight_final_km', '') }}</div></td>
+                                <td><div contenteditable="true" class="editable-cell">{{ freight.get('freight_total_km', '') }}</div></td>
+                                <td><div contenteditable="true" class="editable-cell">{{ freight.get('freight_cost_km', '') }}</div></td>
+                                <td><div contenteditable="true" class="editable-cell">{{ freight.get('freight_value_third', '') }}</div></td>
+                                <td><div contenteditable="true" class="editable-cell">{{ freight.get('freight_value', '') }}</div></td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="form-grid">
+                <div>
+                    <label for="freight_total_value">R$ Total Frete</label>
+                    <input type="text" id="freight_total_value" name="freight_total_value" readonly>
+                </div>
+                <div>
+                    <label for="freight_total_value_third">R$ Total Terceiro</label>
+                    <input type="text" id="freight_total_value_third" name="freight_total_value_third" readonly>
+                </div>
+            </div>
+        </div>
+        <div class="form-section">
+            <h3>Custo Operacional (Tecnico / Motorista)</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="op_cost-day">Dia</th>
+                            <th class="op_cost-tec-driver">Tec / Mot</th>
+                            <th class="op_cost-hr">Hr. Inicial</th>
+                            <th class="op_cost-hr">Hr. Final</th>
+                            <th class="op_cost-hr">Horas</th>
+                            <th class="op_cost-value-hr">Valor/Hr</th>
+                            <th class="op_cost-value-hr">Valor/Comp</th>
+                            <th class="op_cost-hr">Hora Extra</th>
+                            <th class="op_cost-value-hr">R$ Hr Extra (100%) </th>
+                            <th class="op_cost-value-hr">R$ Total Hr. Extra</th>
+                            <th class="op_cost-value">Alim. / Estadia</th>
+                            <th class="op_cost-value">R$</th>
+                        </tr>
+                    </thead>
+                    <tbody id="op_cost_body">
+                        {% set op_costs = custos_parada_data[0]['op_cost'] if custos_parada_data and custos_parada_data[0]['op_cost'] else [] %}
+                        {% for i in range(8) %}
+                            <tr>
+                                {% set op_cost = op_costs[i] if i < op_costs|length else {} %}
+                                <input type="hidden" class="op-cost-id-input" name="stop_cost_op_cost_id" value="{{ op_cost.get('stop_cost_op_cost_id') }}">
+                                <input type="hidden" class="contract-id-input" name="contract_id" value="{{ op_cost.get('contract_id', contract_id) }}">
+                                <td><div contenteditable="true" class="editable-cell">{{ op_cost.get('op_cost_day', '') }}</div></td>
+                                <td><div contenteditable="true" class="editable-cell">{{ op_cost.get('op_cost_tec_driver', '') }}</div></td>
+                                <td><div contenteditable="true" class="editable-cell">{{ op_cost.get('op_cost_initial_hours', '') }}</div></td>
+                                <td><div contenteditable="true" class="editable-cell">{{ op_cost.get('op_cost_final_hours', '') }}</div></td>
+                                <td><div contenteditable="true" class="editable-cell">{{ op_cost.get('op_cost_hours', '') }}</div></td>
+                                <td><div contenteditable="true" class="editable-cell">{{ op_cost.get('op_cost_value_hours', '') }}</div></td>
+                                <td><div contenteditable="true" class="editable-cell">{{ op_cost.get('op_cost_total_value_hours', '') }}</div></td>
+                                <td><div contenteditable="true" class="editable-cell">{{ op_cost.get('op_cost_extra_hours', '') }}</div></td>
+                                <td><div contenteditable="true" class="editable-cell">{{ op_cost.get('op_cost_value_ex_hours', '') }}</div></td>
+                                <td><div contenteditable="true" class="editable-cell">{{ op_cost.get('op_cost_total_value_ex_hours', '') }}</div></td>
+                                <td><div contenteditable="true" class="editable-cell">{{ op_cost.get('op_cost_food_stay', '') }}</div></td>
+                                <td><div contenteditable="true" class="editable-cell">{{ op_cost.get('op_cost_value', '') }}</div></td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="form-grid">
+                <div>
+                    <label for="op_cost_total_value">R$ Total Custo Op.</label>
+                    <input type="text" id="op_cost_total_value" name="op_cost_total_value" readonly>
+                </div>
+                <div>
+                    <label for="op_cost_total_value_food_stay">Desp. Alim. e Estadia</label>
+                    <input type="text" id="op_cost_total_value_food_stay" name="op_cost_total_value_food_stay" readonly>
+                </div>
+            </div>
+        </div>
+        <script src="{{ url_for('static', filename='custos_parada.js') }}"></script>
+    </form>
+</body>
+</html>

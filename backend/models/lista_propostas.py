@@ -1,6 +1,6 @@
 from backend.db_utils import create_session
 from backend.models.estrutura_db import (Proposal, Client, ProposalProduct, ProposalRefund, Product, Refund,
-                                         PaymentCondition, SalesOrder)
+                                         PaymentCondition, Accessories)
 from flask import render_template, jsonify
 from sqlalchemy import func
 from sqlalchemy.orm import aliased
@@ -43,6 +43,7 @@ def buscar_proposta_por_id(proposal_id):
     cond_pag_alias = aliased(PaymentCondition)
     proposal_product_alias = aliased(ProposalProduct)
     proposal_refund_alias = aliased(ProposalRefund)
+    accessories_alias = aliased(Accessories)
 
     try:
         proposta_info = session.query(proposal_alias, client_alias).join(
@@ -61,6 +62,8 @@ def buscar_proposta_por_id(proposal_id):
         ressarcimentos = session.query(refund_alias, proposal_refund_alias).join(
             proposal_refund_alias, proposal_refund_alias.cod == refund_alias.cod
         ).filter(proposal_refund_alias.proposal_id == proposal_id).all()
+
+        acessorios = session.query(accessories_alias).filter_by(proposal_id=proposal_id).all()
 
         cond_pagamento = session.query(cond_pag_alias, proposal_alias).join(
             cond_pag_alias, proposal_alias.payment_condition_id == cond_pag_alias.cod
@@ -115,7 +118,9 @@ def buscar_proposta_por_id(proposal_id):
                     'unit_price': proposal_product.unit_price,
                     'price': proposal_product.price,
                     'extra_hours': proposal_product.extra_hours,
-                    'rental_hours': proposal_product.rental_hours
+                    'rental_hours': proposal_product.rental_hours,
+                    'discount': proposal_product.discount,
+                    'volts': proposal_product.volts
                 }
                 for product, proposal_product in produtos
             ],
@@ -125,9 +130,25 @@ def buscar_proposta_por_id(proposal_id):
                     'descript': refund.descript,
                     'service_quantity': proposal_refund.service_quantity,
                     'service_unit_price': proposal_refund.service_unit_price,
-                    'service_price': proposal_refund.service_price
+                    'service_price': proposal_refund.service_price,
+                    'discount': proposal_refund.discount,
+                    'km': proposal_refund.km
                 }
                 for refund, proposal_refund in ressarcimentos
+            ],
+            'accessories': [
+                {
+                    'accessories_id': accessories.accessories_id,
+                    'accessories_description': accessories.accessories_description,
+                    'accessories_quantity': accessories.accessories_quantity,
+                    'meters': accessories.meters,
+                    'accessories_unit_price': accessories.accessories_unit_price,
+                    'accessories_days': accessories.accessories_days,
+                    'items_meters': accessories.items_meters,
+                    'accessories_discount': accessories.accessories_discount,
+                    'accessories_price': accessories.accessories_price,
+                }
+                for accessories in acessorios
             ]
         }
 
@@ -170,6 +191,8 @@ def atualizar_proposta(proposal_id, dados_atualizados):
             product.price = product_data.get('price', product.price)
             product.extra_hours = product_data.get('extra_hours', product.extra_hours)
             product.rental_hours = product_data.get('rental_hours', product.rental_hours)
+            product.discount = product_data.get('discount', product.discount)
+            product.volts = product_data.get('volts', product.volts)
 
         for service_data in dados_atualizados.get('services', []):
             service = session.query(ProposalRefund).filter_by(proposal_id=proposal_id,
@@ -182,6 +205,33 @@ def atualizar_proposta(proposal_id, dados_atualizados):
             service.service_quantity = service_data.get('service_quantity', service.service_quantity)
             service.service_unit_price = service_data.get('service_unit_price', service.service_unit_price)
             service.service_price = service_data.get('service_price', service.service_price)
+            service.discount = service_data.get('discount', service.discount)
+            service.km = service_data.get('km', service.km)
+
+        for accessories_data in dados_atualizados.get('accessories', []):
+            accessories_id = accessories_data.get('accessories_id')
+
+            if accessories_id:
+                accessory = session.query(Accessories).filter_by(proposal_id=proposal_id,
+                                                                 accessories_id=accessories_id).first()
+                if not accessory:
+                    accessory = Accessories(proposal_id=proposal_id)
+                    session.add(accessory)
+
+            else:
+                max_id = session.query(func.max(Accessories.accessories_id)).scalar() or 0
+                accessories_id = max_id + 1
+                accessory = Accessories(proposal_id=proposal_id, accessories_id=accessories_id)
+                session.add(accessory)
+
+            accessory.accessories_description = accessories_data.get('accessories_description')
+            accessory.accessories_quantity = accessories_data.get('accessories_quantity')
+            accessory.meters = accessories_data.get('meters')
+            accessory.accessories_unit_price = accessories_data.get('accessories_unit_price')
+            accessory.accessories_days = accessories_data.get('accessories_days')
+            accessory.items_meters = accessories_data.get('items_meters')
+            accessory.accessories_discount = accessories_data.get('accessories_discount')
+            accessory.accessories_price = accessories_data.get('accessories_price')
 
         session.commit()
         return {'success': True, 'proposta': proposal_to_dict(proposal)}
@@ -219,7 +269,9 @@ def proposal_to_dict(proposal):
                     'unit_price': product.unit_price,
                     'price': product.price,
                     'extra_hours': product.extra_hours,
-                    'rental_hours': product.rental_hours
+                    'rental_hours': product.rental_hours,
+                    'discount': product.discount,
+                    'volts': product.volts
                 } for product in proposal.products
             ],
             'services': [
@@ -229,8 +281,23 @@ def proposal_to_dict(proposal):
                     'description': service.description,
                     'service_quantity': service.service_quantity,
                     'service_unit_price': service.service_unit_price,
-                    'service_price': service.service_price
+                    'service_price': service.service_price,
+                    'discount': service.discount,
+                    'km': service.km
                 } for service in proposal.services
+            ],
+            'accessories': [
+                {
+                    'accessories_id': accessory.accessories_id,
+                    'accessories_desription': accessory.accessories_description,
+                    'accessories_quantity': accessory.accessories_quantity,
+                    'meters': accessory.meters,
+                    'accessories_unit_price': accessory.accessories_unit_price,
+                    'accessories_days': accessory.accessories_days,
+                    'items_meters': accessory.items_meters,
+                    'accessories_discount': accessory.accessories_discount,
+                    'accessories_price': accessory.accessories_price,
+                } for accessory in proposal.accessories
             ]
         }
 
