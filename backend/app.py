@@ -6,7 +6,8 @@ from backend.models.proposta import (buscar_clientes, buscar_produtos, buscar_se
 from backend.models.contrato import (Contrato, criar_contrato, contract_number, buscar_clientes_proposta,
                                      listar_todos_contratos, buscar_contrato_por_id, atualizar_contrato,
                                      contract_to_dict, add_custo_parada_sub, add_custo_parada_frete,
-                                     add_custo_parada_custo_operacional, buscar_custos_parada_por_id)
+                                     add_custo_parada_custo_operacional, buscar_custos_parada_por_id,
+                                     add_dados_fatura_follow_up, buscar_dados_fatura_follow_up)
 from backend.models.lista_clientes import listar_todos_clientes, buscar_cliente_por_id, atualizar_cliente
 from backend.models.lista_propostas import (listar_todas_propostas, buscar_proposta_por_id, atualizar_proposta,
                                             proposal_to_dict)
@@ -18,7 +19,8 @@ from backend.models.familia_bens import criar_familias, listar_todas_familias, b
 from backend.models.grupo_kva import criar_kva_group, listar_todos_grupo_kva, buscar_grupo_por_id
 from backend.models.fabricantes import criar_fabricante, listar_todos_fabricantes, buscar_fabricantes_por_id
 from backend.models.tipo_modelos_bens import criar_tipo_modelo, listar_todos_modelos, buscar_modelo_por_id
-from backend.models.bens import buscar_assets, buscar_familia_bens, buscar_fabricantes, buscar_tipo_modelo, buscar_centro_custo
+from backend.models.bens import (buscar_assets, buscar_familia_bens, buscar_fabricantes, buscar_tipo_modelo,
+                                 buscar_centro_custo, add_assets_follow_up, buscar_assets_follow_up)
 import traceback
 import logging
 import json
@@ -428,8 +430,6 @@ def editar_custos_parada(contract_id, proposal_id):
 def submit_stop_cost():
     try:
         data = request.get_json()
-        # contract_id = data['contract_id']
-
         print("Data sub: ", data['sub'])
         print("Data freight: ", data['freight'])
         print("Data Op Cost: ", data['op_cost'])
@@ -445,6 +445,36 @@ def submit_stop_cost():
         op_cost_response = add_custo_parada_custo_operacional(data['op_cost'])
         if not op_cost_response.json['success']:
             return op_cost_response
+
+        return jsonify(success=True)
+
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/follow_up/<int:contract_id>/<int:proposal_id>', methods=['GET'])
+def editar_follow_up(contract_id, proposal_id):
+    contrato_data = buscar_contrato_por_id(contract_id, proposal_id)
+    custos_parada_data = buscar_custos_parada_por_id(contract_id)
+    assets_follow_up = buscar_assets_follow_up(contract_id)
+    fatura_data = buscar_dados_fatura_follow_up(contract_id)
+
+    return render_template('follow_up.html', contrato_data=contrato_data,
+                           custos_parada_data=custos_parada_data, assets_follow_up=assets_follow_up,
+                           fatura_data=fatura_data)
+
+
+@app.route('/submit_follow_up', methods=['POST'])
+def submit_follow_up():
+    try:
+        data = request.get_json()
+        assets_response = add_assets_follow_up(data['assets'])
+        if not assets_response.json['success']:
+            return assets_response
+
+        invoice_response = add_dados_fatura_follow_up(data['invoices'])
+        if not invoice_response.json['success']:
+            return invoice_response
 
         return jsonify(success=True)
 

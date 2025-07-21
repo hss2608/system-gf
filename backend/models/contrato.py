@@ -251,6 +251,7 @@ def buscar_contrato_por_id(contract_id, proposal_id):
     proposal_product_alias = aliased(ProposalProduct)
     proposal_refund_alias = aliased(ProposalRefund)
     cond_pag_alias = aliased(PaymentCondition)
+    accessories_alias = aliased(Accessories)
 
     try:
         contrato_info = session.query(contract_alias, proposal_alias, client_alias) \
@@ -270,6 +271,8 @@ def buscar_contrato_por_id(contract_id, proposal_id):
         ressarcimentos = session.query(refund_alias, proposal_refund_alias).join(
             proposal_refund_alias, proposal_refund_alias.cod == refund_alias.cod
         ).filter(proposal_refund_alias.proposal_id == proposal_id).all()
+
+        acessorios = session.query(accessories_alias).filter_by(proposal_id=proposal_id).all()
 
         cond_pagamento = session.query(cond_pag_alias, proposal_alias).join(
             cond_pag_alias, proposal_alias.payment_condition_id == cond_pag_alias.cod
@@ -316,13 +319,13 @@ def buscar_contrato_por_id(contract_id, proposal_id):
                     'product_id': produto.product_id,
                     'product_code': produto.product_code,
                     'description': produto.description,
-                    'valor_basico': produto.price,
-                    'add_description': produto.add_description,
                     'quantity': produto_proposta.quantity,
                     'unit_price': produto_proposta.unit_price,
                     'price': produto_proposta.price,
                     'extra_hours': produto_proposta.extra_hours,
-                    'rental_hours': produto_proposta.rental_hours
+                    'rental_hours': produto_proposta.rental_hours,
+                    'discount': produto_proposta.discount,
+                    'volts': produto_proposta.volts
                 }
                 for produto, produto_proposta in produtos
             ],
@@ -332,9 +335,25 @@ def buscar_contrato_por_id(contract_id, proposal_id):
                     'descript': ressarcimento.descript,
                     'service_quantity': ressarcimento_proposta.service_quantity,
                     'service_unit_price': ressarcimento_proposta.service_unit_price,
-                    'service_price': ressarcimento_proposta.service_price
+                    'service_price': ressarcimento_proposta.service_price,
+                    'discount': ressarcimento_proposta.discount,
+                    'km': ressarcimento_proposta.km
                 }
                 for ressarcimento, ressarcimento_proposta in ressarcimentos
+            ],
+            'accessories': [
+                {
+                    'accessories_id': accessories.accessories_id,
+                    'accessories_description': accessories.accessories_description,
+                    'accessories_quantity': accessories.accessories_quantity,
+                    'meters': accessories.meters,
+                    'accessories_unit_price': accessories.accessories_unit_price,
+                    'accessories_days': accessories.accessories_days,
+                    'items_meters': accessories.items_meters,
+                    'accessories_discount': accessories.accessories_discount,
+                    'accessories_price': accessories.accessories_price,
+                }
+                for accessories in acessorios
             ]
         }
 

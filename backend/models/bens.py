@@ -198,7 +198,6 @@ def add_assets_follow_up(assets_follow_up):
                 current_id = last_assets_id
             assets = AssetsFollowUp(
                 id=current_id,
-                assets_id=asset.get('assets_id', ''),
                 contract_id=asset.get('contract_id', ''),
                 dt_start=asset.get('dt_start', ''),
                 dt_end=asset.get('dt_end', ''),
@@ -216,7 +215,10 @@ def add_assets_follow_up(assets_follow_up):
                 nf_ret=asset.get('nf_ret', ''),
                 dt_ret=asset.get('dt_ret', ''),
                 vr_day_loc=asset.get('vr_day_loc', ''),
-                description=asset.get('description', '')
+                description=asset.get('description', ''),
+                asset_cod=asset.get('asset_cod', ''),
+                value_nf=asset.get('value_nf', ''),
+                obs=asset.get('obs', '')
             )
             print("Assets Follow Up: ", assets)
             session.merge(assets)
@@ -242,14 +244,14 @@ def buscar_assets_follow_up(contract_id):
         follow_up_dict = {
             'assets': [
                 {
-                    'follow_up_id': asset.id, 'assets_id': asset.assets_id, 'contract_id': asset.contract_id,
+                    'follow_up_id': asset.id, 'contract_id': asset.contract_id, 'asset_cod': asset.asset_cod,
                     'dt_start': asset.dt_start, 'dt_end': asset.dt_end, 'diesel_sent': asset.diesel_sent,
-                    'diesel_used': asset.diesel_used, 'desel_returned': asset.diesel_returned,
+                    'diesel_used': asset.diesel_used, 'diesel_returned': asset.diesel_returned,
                     'franchise': asset.franchise, 'initial_horimeter': asset.initial_horimeter,
-                    'final_horimeter': asset.final_horimeter, 'total_hours': asset.total_hours,
+                    'final_horimeter': asset.final_horimeter, 'total_hours': asset.total_hours, 'obs': asset.obs,
                     'extra_hours': asset.extra_hours, 'value_extra_hours': asset.value_extra_hours,
                     'nf_rem': asset.nf_rem, 'dt_rem': asset.dt_rem, 'nf_ret': asset.nf_ret, 'dt_ret': asset.dt_ret,
-                    'vr_day_loc': asset.vr_day_loc, 'description': asset.description
+                    'vr_day_loc': asset.vr_day_loc, 'description': asset.description, 'value_nf': asset.value_nf
                 }
                 for asset in assets
             ]

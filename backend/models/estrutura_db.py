@@ -354,14 +354,12 @@ class Assets(Base):
     model_type = relationship('ModelType', back_populates='assets')
     assets_family = relationship('AssetsFamily', back_populates='assets')
     product = relationship('Product', back_populates='assets')
-    assets_follow_up = relationship('AssetsFollowUp', back_populates='assets')
 
 
 class AssetsFollowUp(Base):
     __tablename__ = 'assets_follow_up'
 
     id = Column(Integer, primary_key=True)
-    assets_id = Column(Integer, ForeignKey('assets.id'))
     contract_id = Column(Integer, ForeignKey('contract.contract_id'))
     dt_start = Column(Date)
     dt_end = Column(Date)
@@ -380,8 +378,10 @@ class AssetsFollowUp(Base):
     dt_ret = Column(Date)
     vr_day_loc = Column(String)
     description = Column(String)
+    asset_cod = Column(String)
+    value_nf = Column(String)
+    obs = Column(String)
 
-    assets = relationship('Assets', back_populates='assets_follow_up')
     contract = relationship('Assets', back_populates='assets_follow_up')
 
 
