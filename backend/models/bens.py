@@ -155,6 +155,7 @@ def add_assets():
 
             session.add(bens)
             session.commit()
+
             print("Debug: Form submitted successfully")
 
         return render_template('bens.html', current_date=current_date)
